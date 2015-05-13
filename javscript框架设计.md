@@ -1,5 +1,6 @@
 #javascript 框架设计
 ====
+## 前言
 
 ###1. 框架与库
 
@@ -26,5 +27,6 @@
 + 具有明确分层构架的MV* 框架。比如CanJS backBonesjs spinejs及angular等
 
   > jquery 特性：get first set all 访问规则； 数据缓存系统；无实例化计数，不需要new
+
 
 
