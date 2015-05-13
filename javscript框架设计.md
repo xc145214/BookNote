@@ -29,4 +29,13 @@
   > jquery 特性：get first set all 访问规则； 数据缓存系统；无实例化计数，不需要new
 
 
+###2.语言模块
 
+####2.1 字符串的扩展与修复
+具体实现：
+contains方法：判断一个字符串是否包括另一个字符串。常规思维使用正则，但是每次都要new RegExp来构造，性能太差，转而使用原生字符串的方法比如：indexOf search
+```
+function contains(target,it){
+  return target.indexOf(it) != -1;//indexOf改为search或者lastIndexOf也行
+}
+```
