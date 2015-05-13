@@ -58,3 +58,61 @@ function startsWith(target, str, ignorecase) {
             start_str === str; 
 }
 ```
+
++ endWIth方法：与startWith相反
+```
+function endsWith(target, str, ignorecase) { 
+    var end_str = target.substring(target.length - str.length); 
+    return ignorecase ? end_str.toLowerCase() === str.toLowerCase() : 
+            end_str === str; 
+} 
+```
+
++ repeat方法：讲一个字符串重复自身N次
+版本1：空数组的join方法。
+```
+function repeat(target,n){
+  return (new Array(n+1)).join(target);
+}
+```
+
+版本 2：版本 1 的改良版，创建一个对象，拥有 length 属性，然后利用 call 方法去调用数组
+原型的 join方法，省去创建数组这一步，性能大为提高。重复次数越多，两者对比越明显。另，
+之所以要创建一个带 length 属性的对象，是因为要调用数组的原型方法，需要指定 call 的第一个
+参数为类数组对象。而类数组对象的必要条件是其 length 属性的值为非负整数。 
+```
+function repeat(target,n){
+  return Array.prototype.join.call({
+    length : n+1
+  },target);
+}
+```
+
+版本 3：版本 2 的改良版，利用闭包将类数组对象与数组原型的 join方法缓存起来，省得每
+次都重复创建与寻找方法。 
+```
+var repeat = (function() {
+  var join = Array.prototype.join, obj = {};
+  return function(target,n){
+    obj.length = n + 1;
+    return join.call(obj,target);
+  }
+})();
+```
+
+版本 4：从算法上着手，使用二分法，比如我们将 ruby 重复 5 次，其实我们在第二次已得
+rubyruby，那么 3 次直接用 rubyruby 进行操作，而不是用 ruby。 
+```
+function repeat(target,n){
+  var s = target, total = [];
+  while(n > 0) {
+    if (n % 2 ==1)
+      total[total.length] = s;//如果是奇数
+    if (n == 1)
+      break;
+    s += s;
+    n = n >> 1;//相当于n除以2取其商
+  }
+  return total.join('');
+}
+```
