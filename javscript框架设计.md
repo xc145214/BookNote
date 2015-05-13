@@ -33,9 +33,28 @@
 
 ####2.1 字符串的扩展与修复
 具体实现：
-contains方法：判断一个字符串是否包括另一个字符串。常规思维使用正则，但是每次都要new RegExp来构造，性能太差，转而使用原生字符串的方法比如：indexOf search
+
++ contains方法：判断一个字符串是否包括另一个字符串。常规思维使用正则，但是每次都要new RegExp来构造，性能太差，转而使用原生字符串的方法比如：indexOf search
 ```
 function contains(target,it){
   return target.indexOf(it) != -1;//indexOf改为search或者lastIndexOf也行
+}
+```
+mootools版本
+```
+function contains(target, str, separator) { 
+    return separator ? 
+            (separator + target + separator).indexOf(separator + str + separator) > -1 : 
+            target.indexOf(str) > -1; 
+} 
+```
+
++ startWith方法：判断字符串是否位于原字符串的开始之处，contains变种
+```
+//最后一参数是忽略大小写 
+function startsWith(target, str, ignorecase) { 
+    var start_str = target.substr(0, str.length); 
+    return ignorecase ? start_str.toLowerCase() === str.toLowerCase() : 
+            start_str === str; 
 }
 ```
