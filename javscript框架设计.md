@@ -22,8 +22,5 @@
 + 以命名空间为导向的类库或者框架：完全的Java风格，代表作有YUI和EXT
 + 以类工厂为导向的框架：比如Prototype，mootools,Base2等
 + 以选择起为导向的框架：比如Jquery
-
-++ get first set all 访问规则；
-++ 数据缓存系统；
-++无实例化计数，不需要new
+  > jquery 特性：get first set all 访问规则； 数据缓存系统；无实例化计数，不需要new
  
