@@ -69,6 +69,7 @@ function endsWith(target, str, ignorecase) {
 ```
 
 + repeat方法：讲一个字符串重复自身N次
+
 版本1：空数组的join方法。
 ```
 function repeat(target,n){
