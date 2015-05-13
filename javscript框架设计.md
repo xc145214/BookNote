@@ -22,6 +22,9 @@
 + 以命名空间为导向的类库或者框架：完全的Java风格，代表作有YUI和EXT
 + 以类工厂为导向的框架：比如Prototype，mootools,Base2等
 + 以选择起为导向的框架：比如Jquery
++ 已加载器串联起来的框架：比如模块化的AMD，比如kissy mass
++ 具有明确分层构架的MV* 框架。比如CanJS backBonesjs spinejs及angular等
 
   > jquery 特性：get first set all 访问规则； 数据缓存系统；无实例化计数，不需要new
- 
+
+
