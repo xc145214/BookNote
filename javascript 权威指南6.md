@@ -101,3 +101,40 @@ false == (x > y)      //true:false与false相等
 (x > 3)||(y < 3)        //false： 或
 !(x == 3)               //true:求反
 ```
+
+函数
+```
+//函数是一段带有参数的代码段，可以被多次调用
+function plus1(x){  //定义函数
+  return x + 1;     //返回值
+}
+var y = 3;
+plus1(y)        //=>4
+
+var square = function(x) {  //函数是一种值，可以复制给变量
+  return x*x;
+};
+square(plus(y)) //=> 16
+```
+
+函数与对象写时就变成了方法：
+```
+//当函数赋值给对象的属性时，成为方法，所有的javascript对象都有方法
+var a = [];               //创建数组
+a.push(1,2,3);            //数组的方法push：添加元素
+a.reverse();              //数组的方法reverse:翻转元素
+
+var points = [
+  {x:0,y:0},            //具有2个对象的数组
+  {x:1,y:1}             //每个元素都是对象
+];
+//定义自己的方法，this 关键字来调用
+points.dist = function(){     //计算2点间距
+  var p1 = this[0];           //this调用当前数组
+  var p2 = this[1];
+  var a = p2.x - p1.x;
+  var b = p2.y - p1.y;
+  return Math.sqrt(a*a + b*b);
+};
+points.dist()               //=>1.4142135623730951
+```
