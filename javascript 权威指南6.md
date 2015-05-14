@@ -138,3 +138,36 @@ points.dist = function(){     //计算2点间距
 };
 points.dist()               //=>1.4142135623730951
 ```
+
+控制语句
+```
+//判断与循环
+//绝对值函数
+function abs(x){
+  if(x >=0 ){
+    return x;
+  }else{
+    return -x;
+  }
+}
+
+//阶乘函数
+function factorial(n){
+  var product = 1;
+  while(n > 1){
+    product *= n;
+    n--;
+  }
+  return product;
+}
+factorial(4)        //=>24 : 1*4*3*2
+
+function factorial2(n){
+  var i ,product = 1;
+  for (i = 2;i <= n; i ++){
+    product *= i;
+  }
+  return product;
+}
+fatorial2(5)      //=>120:1*2*3*4*5
+```
