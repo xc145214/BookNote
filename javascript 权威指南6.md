@@ -65,3 +65,39 @@ var data = {                //包含两个属性的对象
   trial2 : [[2,3],[4,5]]    //数组的元素也是数组
 }
 ```
+
+运算符
+```
+// 运算符作用于操作数，生成一个新的值
+3 + 2                       // =>5 加法
+3 - 2                       // =>1 减法
+3 * 2                       // =>5 乘法
+3 / 2                       // =>1.5 除法
+points[1].x - point[0].x    // =>1
+"3" +　"2"                  // =>"32",+ 可以作为加法运算符，也可以作为字符串连接
+
+//一些简写运算符
+var count = 0;              //定义变量
+count ++;                   //自增1
+count --;                   //自减
+count += 2;
+count *= 3;
+count                       // =>6:变量本省也是一个表达式
+
+//相等关系运算符来判断两值是否相等，返回true或者false
+var x = 2, y = 3;           
+x == y                //false
+x != y                //true
+x <= y                //true
+x < y                 //true
+x >= y                //false
+x > y                 //false
+"two" == "three"      //false
+"two" > "three"       //true: "tw"的字母索引大于"th"
+false == (x > y)      //true:false与false相等
+
+//逻辑运算符是对Boolean的合并和求反
+(x == 2)&&(y == 3)      //true:与
+(x > 3)||(y < 3)        //false： 或
+!(x == 3)               //true:求反
+```
