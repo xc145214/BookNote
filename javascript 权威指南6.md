@@ -171,3 +171,23 @@ function factorial2(n){
 }
 fatorial2(5)      //=>120:1*2*3*4*5
 ```
+
+面向对象
+```
+//定义一个构造函数以初始化一个新的对象
+function Point(x,y){        //按照惯例，构造函数以大写字母开头
+  this.x = x;               //this指代初始化的实例，将函数的参数存储为对象的属性
+  this.y = y;               //不需要return
+}
+
+//使用new 构造实例
+var p = new Point(1,1);
+
+//通过构造函数的prototype对象赋值来给Point对象定义方法
+Point.prototype.r = function(){
+  return Math.sqrt(this.x*this.x + this.y*this.y);
+}
+
+//Point的实例对象继承方法r()
+p.r()           //=>1.4142135623730951
+```
