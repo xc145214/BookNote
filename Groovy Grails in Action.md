@@ -299,3 +299,53 @@ grails.config.locations = [ "classpath:${appName}-config.properties",
 ```
 上边的例子演示了从classpath和USER_HOME这些不同的位置来加载配置文件（包括Java属性（properties）文件和 ConfigSlurper 配置）。
 最终所有的配置文件都被合并到了 GrailsApplication 对象的 config 属性中，就可以通过这个属性来获取配置信息了。
+
+####3.ＧＲＯＭ
+3.1 domain类可以使用 create-domain-class 命令来创建:
+grails create-domain-class Person
+这将在 grails-app/domain/Person.groovy 位置上创建类，如下:
+```
+//添加自定义字段
+class Person {   
+    //默认添加id
+    String name
+    Integer age
+    Date lastVisit
+}
+```
+在数据库中查看结果：默认添加id 和 version 2个字段
+id   version   age   last_visit  name
+
+3.2 CURD
+**Create** 
+为了创建一个 domain 类，可以使用 Groovy new操作符, 设置它的属性并调用 save:
+```
+def p = new Person(name:"Fred", age:40, lastVisit:new Date())
+p.save()
+save 方法将使用底层的Hibernate ORM持久你的类到数据库中。
+``` 
+**Read**
+Grails 会为你的domain类显式的添加一个隐式 id 属性，便于你检索:
+``` 
+def p = Person.get(1)
+assert 1 == p.id
+```
+get 方法通过你指定的数据库标识符，从db中读取  Person对象。 你同样可以使用 read 方法加载一个只读状态对象:
+``` 
+def p = Person.read(1)
+```
+在这种情况下，底层的 Hibernate 引擎不会进行任何脏读检查，对象也不能被持久化。注意,假如你显式的调用 save 方法，对象会回到 read-write 状态.
+ 
+**Update**
+更新一个实体, 设置一些属性，然后，只需再次调用 save:
+ ```
+def p = Person.get(1)
+p.name = "Bob"
+p.save()
+``` 
+**Delete**
+删除一个实体使用 delete 方法:
+ ```
+def p = Person.get(1)
+p.delete()
+ ```
