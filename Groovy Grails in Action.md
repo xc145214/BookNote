@@ -27,5 +27,6 @@ grails run-app
 ```
 修改指定运行端口：
 > 1. 运行指令：`grails -Dserver.port=8090 run-app`
+
 > 2.在BuildConfig.groovy 中加入：`grails.server.port.http = 9000   //set runtime port`
 
