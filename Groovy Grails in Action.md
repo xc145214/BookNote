@@ -408,3 +408,56 @@ class Nose {
 }
 ```
 注意，在这种情况下，我们没有在belongsTo使用map语法声明和明确命名关联。Grails 会把它当做单向。
+
+3.3.2 one-to-many
+one-to-many 关联是，当你的一个类，比如 Author ，拥有许多其他类的实体，比如 Book 。 在Grails 中定义这样的关联可以使用 hasMany :
+ ```
+class Author {
+    static hasMany = [ books : Book ]
+    String name
+}
+class Book {
+        String title
+}
+```
+在这种情况下，拥有一个单向的one-to-many关联。 Grails 将默认使用一个连接表映射这样的关联。
+对于 hasMany 设置，Grails将自动注入一个java.util.Set类型的属性到domain类。用于迭代集合:
+ ```
+def a = Author.get(1)
+a.books.each {
+        println it.title
+}
+```
+默认的级联行为是级联保存和更新，但不删除，除非 belongsTo 被指定:
+ ```
+class Author {
+    static hasMany = [ books : Book ]
+    String name
+}
+class Book {
+        static belongsTo = [author:Author]
+        String title
+}
+```
+如果在one-to-many的多方拥有2个同类型的属性，必须使用mappedBy 指定哪个集合被映射:
+ ```
+class Airport {
+        static hasMany = [flights:Flight]
+        static mappedBy = [flights:"departureAirport"]
+}
+class Flight {
+        Airport departureAirport
+        Airport destinationAirport
+}
+```
+如果多方拥有多个集合被映射到不同的属性，也是一样的:
+ ```
+class Airport {
+        static hasMany = [outboundFlights:Flight, inboundFlights:Flight]
+        static mappedBy = [outboundFlights:"departureAirport", inboundFlights:"destinationAirport"]
+}
+class Flight {
+        Airport departureAirport
+        Airport destinationAirport
+}
+```
