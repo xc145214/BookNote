@@ -349,3 +349,62 @@ p.save()
 def p = Person.get(1)
 p.delete()
  ```
+3.3 GORM中的关联
+3.3.1 One-to-One
++ 单项关联
+```
+
+class Face {
+    Nose nose
+}
+class Nose {       
+}
+```
++ 双向关联
+```
+calss Face{
+    Nose nose
+}
+class Nose{
+    Face face
+}
+```
++ 级联更新
+```
+//belongsTo
+class Face {
+    Nose nose
+}
+class Nose {       
+        static belongsTo = [face:Face]
+}
+```
+在这种情况下，我们使用 belongsTo 来设置Nose "属于" Face。结果是，我们创建一个Face并save 它，数据库将 级联 更新/插入  Nose:
+`new Face(nose:new Nose()).save()`
+上面的示例，face 和 nose都会被保存。注意，逆向 不为 true，并会因为一个临时的Face导致一个错误:
+`new Nose(face:new Face()).save() // will cause an error`
+belongsTo另一个重要的意义在于，假如你删除一个 Face 实体， Nose 也会被删除:
+``` 
+def f = Face.get(1)
+f.delete() // both Face and Nose deleted
+```
+如果没有belongsTo ，deletes 将不被级联，并会得到一个外键约束错误，除非你明确的删除Nose:
+```
+// error here without belongsTo
+def f = Face.get(1)
+f.delete()
+// no error as we explicitly delete both
+def f = Face.get(1)
+f.nose.delete()
+f.delete()
+```
+你可以保持上面的关联为单向，为了保证级联保存/更新,可以像下面这样:
+ ```
+class Face {
+    Nose nose
+}
+class Nose {       
+        static belongsTo = Face
+}
+```
+注意，在这种情况下，我们没有在belongsTo使用map语法声明和明确命名关联。Grails 会把它当做单向。
