@@ -228,3 +228,40 @@ environments {
 }
 ```
 注意配置文件的开头部分提供的是公共配置，紧接着的 environments 代码块则指定了用于独立环境配置的数据源信息，包括dbCreate和url属性。这样的语法也可以用与Config.groovy文件。
+
+2.3 数据源
+安装数据源需要JDBC驱动，例如使用MySQL数据库，就需要Connector/J这个JDBC驱动。通常这些JDBC驱动都是以JAR文件格式发行的。将需要的JAR文件放到项目的  lib 目录下即可。
+还需在grails-app/conf/DataSource.groovy 的Grails数据库描述文件。这个文件包含了数据源的定义，其中有下列这些设置：
++ driverClassName - JDBC驱动的类名
++ username - 获得JDBC连接需要使用的用户名
++ password - 获得JDBC连接需要使用的密码
++ url - 数据库的JDBC URL
++ dbCreate - 是否从domain模型自动生成数据库
++ pooled - 是否使用连接池（默认为true）
++ logSql - 是否启动SQL日志记录
++ dialect - 用于表示与数据库通讯时应该使用的Hibernate方言的字符串或类。查看 org.hibernate.dialect 一文以便获得可用的方言。
+一个用于MySQL数据库的典型配置可以像这样：
+ 
+dataSource {
+        pooled = true
+        dbCreate = "update"
+        url = "jdbc:mysql://localhost/yourDB"
+        driverClassName = "com.mysql.jdbc.Driver"
+        username = "yourUser"
+        password = "yourPassword"   
+}
+
+2.3.1 数据源和环境
+Grails的数据源定义是“环境感知”的，因此你可以针对需要的环境这样配置：
+``` 
+dataSource {
+        // 这里放置公共设置
+}                     
+environments {
+  production {
+     dataSource {
+          url = "jdbc:mysql://liveip.com/liveDb"                                    
+     }                     
+  }
+}
+```
