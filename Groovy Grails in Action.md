@@ -265,3 +265,37 @@ environments {
   }
 }
 ```
+
+2.3.2 JNDI 数据源
+有时你可能需要通过JNDI去查找一个  数据源。
+Grails支持像下边这样的JNDI数据源定义：
+```
+dataSource {
+    jndiName = "java:comp/env/myDataSource"
+}
+```
+JNDI的名称格式在不同的容器中会有不同，但是在定义 数据源 的方式上是一致的。
+2.3.3 自定义数据库迁移
+DataSource的dbCreate属性是非常重要的，它会指示Grails在运行期间使用GORM类来自动生成数据库表。选项如下：
++ create-drop - 当Grails运行的时候删除并且重新创建数据库。
++ create - 如果数据库不存在则创建数据库，存在则不做任何修改。删除现有的数据。
++ update - 如果数据库不存在则创建数据库，存在则对它进行修改更新。
+ 
+**create-drop 和 create 都会删除所有存在的数据，因此请小心使用！**
+在部署 模式下 dbCreate 默认被设置为“create-drop”：
+```
+dataSource {
+        dbCreate = "create-drop" // one of 'create', 'create-drop','update'
+}
+```
+在每次应用程序重启时都会自动删除并重建数据库表。显然，这不应该用于生产环境。
+2.4 外部配置
+为了支持这种外部配置文件的部署方案，你需要在Config.groovy文件的grails.config.locations设置中指明你的外部配置文件所在位置：
+```
+grails.config.locations = [ "classpath:${appName}-config.properties",
+                            "classpath:${appName}-config.groovy",
+                            "file:${userHome}/.grails/${appName}-config.properties",
+                            "file:${userHome}/.grails/${appName}-config.groovy"]
+```
+上边的例子演示了从classpath和USER_HOME这些不同的位置来加载配置文件（包括Java属性（properties）文件和 ConfigSlurper 配置）。
+最终所有的配置文件都被合并到了 GrailsApplication 对象的 config 属性中，就可以通过这个属性来获取配置信息了。
