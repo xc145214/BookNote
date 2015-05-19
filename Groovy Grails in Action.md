@@ -1,7 +1,7 @@
 #Grails in Action
 
 ===
-###1。 入门
+###1. 入门
 
 1.1 下载与安装
 + 下载安装包
@@ -34,11 +34,197 @@ grails war
 
 //快速生成一个应用
 grails generate-all Book
+
+//跟踪日志
+grails -Dgrails.full.stacktrace=true run-app
 ```
 修改指定运行端口：
 > 1. 运行指令：`grails -Dserver.port=8090 run-app`
 
 > 2. 在BuildConfig.groovy 中加入：`grails.server.port.http = 9000   //set runtime port`
 
+###2. 配置
 
+2.1 基本配置
+Grails提供了一个名为  grails-app/conf/Config.groovy 的文件用来进行一般性配置。
+Grails提供了下列配置选项：
++ grails.config.locations - 资源（properties）文件或需要被合并到主配置文件中的附加Grails配置文件的位置
++ grails.enable.native2ascii - 如果你不需要对Grails的i18n资源（properties）文件进行native2ascii的转换，那么就将该选项设为false
++ grails.views.default.codec - 用于设置GSP文件的默认编码体制——可以设置“none”、“html”或“base64”中的一个（默认值为：“none”）。为了降低XSS攻击的风险可以将改选项设为“html”。
++ grails.views.gsp.encoding - 用于GSP源代码文件的文件编码（默认为“utf-8”）
++ grails.mime.file.extensions - 是否使用文件扩展名来表示内容协商中的MIME类型
++ grails.mime.types - 被支持的用于内容协商中的MIME类型对应表
++ grails.serverURL - 一个用于描述绝对链接中服务器URL部分的字符串，其中包括了服务器名称。例如：grails.serverURL="http://my.yourportal.com"。
+生成War文件
++ grails.war.destFile - 用来设置 war 命令将把生成的WAR文件放置在什么位置
++ grails.war.dependencies - 一个包含了Ant构建器语法或JAR文件列表的闭包。允许你指定哪些库文件需要被包含在WAR文件中。
++ grails.war.java5.dependencies - 一个JAR文件列表，这些JAR文件是需要被包含在用于JDK 1.5或以上版本的WAR文件里的。
++ grails.war.copyToWebApp - 一个包含了Ant构建器语法的闭包，这些语法应该符合Ant的拷贝语法，例如“fileset()”。该功能允许你控制将“web-app”目录中的哪些内容包含到WAR文件中。
++ grails.war.resources - 一个包含了Ant构建器语法的闭包。允许应用程序在正式生成WAR文件前做一些必要的事情。
 
+2.2 日志
+日志基础
+Grails使用它的通用配置方式来配置潜在的 Log4j 日志系统。要配置日志你需要修改位于 grails-app/conf 目录下的 Config.groovy 文件。
+这个独特的 Config.groovy 文件允许你为开发（development）、测试（test）和生产（production）环境（environments）分别进行日志的配置。Grails将适当地处理  Config.groovy 文件并配置Log4j。
+从1.1版本的Grails开始，提供了一个 Log4j DSL，你可以像如下例子一样来配置Log4j：
+``` 
+log4j = {
+    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+               'org.codehaus.groovy.grails.web.pages' //  GSP
+    warn   'org.mortbay.log'
+}
+```
+实际上，每个方法都可以转化为一个日志级别，你可以把你想要记录日志的包名作为方法的参数。以下是一些有用的日志记录器：
+org.codehaus.groovy.grails.commons - 记录核心工件的信息，如类加载等。
+org.codehaus.groovy.grails.web - 记录Grails的Web请求处理
+org.codehaus.groovy.grails.web.mapping - URL映射的调试
+org.codehaus.groovy.grails.plugins - 记录插件活动情况
+org.springframework -查看Spring在做什么
+org.hibernate - 查看Hibernate在做什么
+ 
+顶级日志记录器
+顶级日志记录器会被所有其他日志记录器继承。你可以使用root方法来配置顶级日志记录器：
+``` 
+root {
+    error()
+    additivity = true
+}
+```
+下边的例子用来配置顶级日志记录器去记录错误级别的信息，它的上方是默认的标准输出目标。你也可以将顶级日志记录器配置为将日志输出到多个已命名的输出目标：
+``` 
+appenders {
+        file name:'file', file:'/var/logs/mylog.log'
+}
+root {
+    debug 'stdout', 'file'
+    additivity = true
+}
+```
+这里的顶级日志记录器将日志记录到了两个输出目标——默认的“stdout”输出目标和一个“file”输出目标。
+你也可以通过参数方式进入Lorg4J闭包的方式来配置顶级日志记录器：
+```
+log4j = { root ->
+    root.level = org.apache.log4j.Level.DEBUG
+    …
+}
+```
+闭包参数“root”是 org.apache.log4j.Logger 的一个实例，因此你可以查阅Log4J的API文档，找出哪些属性和方法对你有用。
+ 
+自定义输出目标
+使用Log4j你可以明确的定义输出目标。下边是默认可用的输出目标：
+jdbc - 用于将日志输出到JDBC连接的输出目标
+console - 用于将日志输出到标准输出的输出目标
+file - 用于将日志输出到文件的输出目标
+rollingFile - 用于将日志输出到滚动文件集的输出目标
+例如你可以配置一个滚动文件输出目标：
+``` 
+log4j = {
+        appenders {
+                rollingFile name:"myAppender", maxFileSize:1024, fileName:"/tmp/logs/myApp.log"
+        }
+}
+```
+每个进入输出目标的参数都会对应到 Appender 类的一个属性。上边的例子设置了RollingFileAppender 类的name、maxFileSize和fileName属性。
+如果你愿意通过自己编程来创建输出目标或者你已经有自己的输出目标实现，那么你可以简单地调用  appender 方法以及输出目标实例：
+ ```
+import org.apache.log4j.*
+log4j = {
+        appenders {
+                appender new RollingFileAppender(name:"myAppender", maxFileSize:1024, fileName:"/tmp/logs/myApp.log")
+        }
+}
+```
+现在你可以将输出目标的名称作为一个唯一值设置到某个日志级别方法中，这样日志就记录到一个特定的输出目标中。这些在上一节讲述过：
+ ```
+error myAppender:"org.codehaus.groovy.grails.commons"
+ ```
+ 
+自定义布局
+Log4j DSL默认假设你想要使用 样板布局（PatternLayout） 日志格式。也有如下其他布局可用使用：
+xml - 创建一个XML布局日志文件
+html - 创建一个HTML布局日志文件
+simple - 创建一个简单的纯文本布局日志文件
+pattern - 创建一个样板布局日志文件
+你可以使用layout设置来指定自定义的样板作为一个输出目标：
+``` 
+log4j = {
+        appenders {
+        console name:'customAppender', layout:pattern(conversionPattern: '%c{2} %m%n')
+    }
+}
+```
+这样的设置也可以用于内置的“stdout”输出目标，这样会将日志输出到控制台中：
+```
+log4j = {
+    appenders {
+        console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
+    }
+}
+```
+完整的堆栈日志跟踪
+当发生异常时，会产生大量来自Java和Groovy内部的堆栈日志信息。Grails过滤了那些典型的无关信息，同时聚焦到非Grails/Groovy核心类的信息上。
+当这种情况发生时，完整的追踪信息总是会写到 StackTrace 日志记录器。这些日志被记录到一个称为stacktrace.log的文件中 - 当然你也可以修改  Config.groovy 文件来进行你想要的设置。例如，如果你更喜欢将完整的堆栈记录信息输出到标准输出，可以添加这样一行：
+ 
+error stdout:"StackTrace"
+你也可以将 grails.full.stacktrace 虚拟机属性设置为  true 来完全禁用堆栈跟踪过滤器：
+``` 
+grails -Dgrails.full.stacktrace=true run-app
+```
+约定的日志记录方式
+所有的应用程序工件都有一个动态添加的 log 属性。这些工件类型包括 domain类、控制器和标记库等。下边是一个使用例子：
+``` 
+def foo = "bar"
+log.debug "The value of foo is $foo"
+```
+Grails使用 grails.app.<工件类型>.ClassName 来作为日志记录器的命名。下边是一个如何配置日志记录器去记录不同Grails工件的日志的例子：
+ ```
+log4j = {
+        // 为所有的应用程序工件设置
+        info "grails.app"
+        // 为一个特定的控制器设置
+        debug "grails.app.controller.YourController"
+        // 为一个特定的domain类设置
+        debug "grails.app.domain.Book"
+        // 为所有的标记库设置
+        info "grails.app.tagLib"
+}
+```
+工件名称（<工件类型>）也是按照约定命名的，一些常见的如下列表：
+bootstrap - 用于系统启动类
+dataSource - 用于数据源
+tagLib - 用于标记库
+service - 用于服务类
+controller - 用于控制器
+domain - 用于domain实体
+ 
+2.2 多环境配置
+Grails支持“多环境配置”的概念。grails-app/conf中的Config.groovy和DataSource.groovy两个文件能够使用ConfigSlurper提供的语法来应用“多环境配置”的特性。以下例子是Grails提供的默认  DataSource 里的定义：
+```
+dataSource {
+    pooled = false                          
+    driverClassName = "org.hsqldb.jdbcDriver"       
+    username = "sa"
+    password = ""                           
+}
+environments {
+    development {
+        dataSource {
+            dbCreate = "create-drop" // 可选“create”、“createeate-drop”和“update”中的一个
+            url = "jdbc:hsqldb:mem:devDB"
+        }
+    }   
+    test {
+        dataSource {
+            dbCreate = "update"
+            url = "jdbc:hsqldb:mem:testDb"
+        }
+    }   
+    production {
+        dataSource {
+            dbCreate = "update"
+            url = "jdbc:hsqldb:file:prodDb;shutdown=true"
+        }
+    }
+}
+```
+注意配置文件的开头部分提供的是公共配置，紧接着的 environments 代码块则指定了用于独立环境配置的数据源信息，包括dbCreate和url属性。这样的语法也可以用与Config.groovy文件。
