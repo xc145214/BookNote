@@ -301,6 +301,7 @@ grails.config.locations = [ "classpath:${appName}-config.properties",
 最终所有的配置文件都被合并到了 GrailsApplication 对象的 config 属性中，就可以通过这个属性来获取配置信息了。
 
 ####3.ＧＲＯＭ
+
 3.1 domain类可以使用 create-domain-class 命令来创建:
 grails create-domain-class Person
 这将在 grails-app/domain/Person.groovy 位置上创建类，如下:
@@ -349,7 +350,8 @@ p.save()
 def p = Person.get(1)
 p.delete()
  ```
-3.3 GORM中的关联
+3.3 **GORM中的关联**
+
 3.3.1 One-to-One
 + 单项关联
 ```
@@ -461,3 +463,58 @@ class Flight {
         Airport destinationAirport
 }
 ```
+
+3.3.3 Many-to-Many
+Grails支持many-to-many关联，通过在关联双方定义 hasMany ，并在关联拥有方定义 belongsTo :
+ ```
+class Book {
+   static belongsTo = Author
+   static hasMany = [authors:Author]
+   String title
+}
+class Author {
+   static hasMany = [books:Book]
+   String name
+}
+```
+Grails在数据库层使用一个连接表来映射many-to-many，在这种情况下，Author 负责持久化关联，并且是唯一可以级联保存另一端的一方 。
+例如，下面这个可以进行正常级联保存工作:
+ ```
+new Author(name:"Stephen King")
+                .addToBooks(new Book(title:"The Stand"))
+                .addToBooks(new Book(title:"The Shining"))           
+                .save()
+```
+而下面这个只保存 Book而不保存 authors!
+``` 
+new Book(name:"Groovy in Action")
+                .addToAuthors(new Author(name:"Dierk Koenig"))
+                .addToAuthors(new Author(name:"Guillaume Laforge"))             
+                .save()
+```
+这是所期待的行为，就像Hibernate，只有many-to-many的一方可以负责管理关联。
+
+3.4 **集合类型**
+
+3.4.1  集合基础
+除了关联不同 domain 类外, GORM 同样支持映射基本的集合类型。比如，下面的类创建一个 nicknames 关联， 它是一个  String 的 Set 实体:
+```
+class Person {
+    static hasMany = [nicknames:String]
+}
+```
+GORM 将使用一个链接表，来映射上面的关联。你可以使用joinTable参数来改变各式各样的连接表映射:
+ ```
+class Person {
+    static hasMany = [nicknames:String]
+    static mapping = {
+       hasMany joinTable:[name:'bunch_o_nicknames', key:'person_id', column:'nickname', type:"text"]       
+    } 
+}
+```
+上面的示例映射到表后看上去像这样:
+
+bunch_o_nicknames |Table
+------------------|---------------------------
+ person_id         |     nickname          
+   1               |      Fred             |
