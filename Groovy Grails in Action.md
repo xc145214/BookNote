@@ -892,3 +892,267 @@ def airport = Airport.createCriteria().get {
 ```
 
 ####4. GROM 查询
+
+GORM提供了从动态查询器到criteria到Hibernate面向对象查询语言HQL的一系列查询方式.
+
++ 获取实例列表
+
+如果你简单的需要获得给定类的所有实例，你可以使用 list 方法:`def books = Book.list()`
+list 方法支持分页参数:`def books = Book.list(offset:10, max:20)`
+也可以排序: `def books = Book.list(sort:"title", order:"asc")`
+这里， the sort 参数是您想要查询的domain类中属性的名字，参数要么以 asc结束,要么以  desc结束.
+ 
++根据数据库标识符取回
+
+第二个取回的基本形式是根据数据库标识符取回，使用 get 方法:
+``` 
+def book = Book.get(23)
+```
+你也可以根据一个标识符的集合使用 getAll方法取得一个实例列表:
+ ```
+def books = Book.getAll(23, 93, 81)
+```
+
+4.1 动态查询
+
+GORM支持 动态查找器 的概念 . 动态查找器看起来像一个静态方法的调用，但是这些方法本身在代码中实际上并不存在.
+而是在运行时基于一个给定类的属性,自动生成一个方法. 比如例子中的 Book 类:
+```
+class Book {
+        String title
+        Date releaseDate
+        Author author
+}                
+class Author {
+        String name
+}
+```
+
+Book 类有一些属性，比如 title,  releaseDate 和 author. 这些都可以按照"方法表达式"的格式被用于 findBy 和 findAllBy 方法:
+ ```
+def book = Book.findByTitle("The Stand")
+book = Book.findByTitleLike("Harry Pot%")
+book = Book.findByReleaseDateBetween( firstDate, secondDate )
+book = Book.findByReleaseDateGreaterThan( someDate )
+```
+
+**方法表达式**
+
+在GORM中一个方法表达式由前缀,比如 findBy 后面跟一个表达式组成，这个表达式由一个或多个属性组成。基本形式是:
+``` 
+Book.findBy([Property][Comparator][Boolean Operator])?[Property][Comparator]
+```
+
+用'?' 标记的部分是可选的. 每个后缀都会改变查询的性质。例如:
+``` 
+def book = Book.findByTitle("The Stand")
+book =  Book.findByTitleLike("Harry Pot%")
+```
+
+在上面的例子中，第一个查询等价于等于后面的值, 第二个因为增加了 Like 后缀, 它等价于SQL的 like 表达式.
+可用的后缀包括:
+
++ InList - list中给定的值
++ LessThan - 小于给定值
++ LessThanEquals - 小于或等于给定值
++ GreaterThan - 大于给定值
++ GreaterThanEquals - 大于或等于给定值
++ Like - 价于 SQL like 表达式
++ Ilike - 类似于Like,但不是大小写敏感
++ NotEqual - 不等于
++ Between - 于两个值之间 (需要两个参数)
++ IsNotNull - 不为null的值 (不需要参数)
++ IsNull - 为null的值 (不需要参数)
+
+你会发现最后三个方法标注了参数的个数，他们的示例如下:
+ ```
+def now = new Date()
+def lastWeek = now - 7
+def book = Book.findByReleaseDateBetween( lastWeek, now )
+books = Book.findAllByReleaseDateIsNull()
+books = Book.findAllByReleaseDateIsNotNull()
+book = Book.findByTitleLikeOrReleaseDateLessThan( "%Something%", someDate )
+```
+
+**布尔逻辑**
+
+方法表达式也可以使用一个布尔操作符来组合两个criteria:
+``` 
+def books = 
+    Book.findAllByTitleLikeAndReleaseDateGreaterThan("%Java%", new Date()-30)
+    ```
+在这里我们在查询中间使用 And 来确保两个条件都满足, 但是同样地你也可以使用  Or:
+``` 
+def books = 
+    Book.findAllByTitleLikeOrReleaseDateGreaterThan("%Java%", new Date()-30)
+```
+此时, 你最多只能用两个criteria做动态查询, 也就是说，该方法的名称只能含有一个布尔操作符. 如果你需要使用更多的, 你应该考虑使用 Criteria 或 HQL.
+
+**查询关联**
+
+关联也可以被用在查询中:
+```
+def author = Author.findByName("Stephen King")
+def books = author ? Book.findAllByAuthor(author) : []
+```
+在这里如果 Author 实例不为null 我们在查询中用它取得给定  Author 的所有Book实例.
+
+分页和排序
+跟 list 方法上可用的分页和排序参数一样,他们同样可以被提供为一个map用于动态查询器的最后一个参数:
+```
+def books = 
+  Book.findAllByTitleLike("Harry Pot%", [max:3, 
+                                         offset:2, 
+                                         sort:"title",
+                                         order:"desc"])
+```
+
+4.2 条件查询
+
+Criteria 是一种类型安全的、高级的查询方法，它使用Groovy builder构造强大复杂的查询.它是一种比使用StringBuffer好得多的选择.
+Criteria可以通过 createCriteria 或者 withCriteria 方法来使用. builder使用Hibernate的Criteria API, builder上的节点对应Hibernate Criteria API中 Restrictions 类中的静态方法. 用法示例:
+```
+def c = Account.createCriteria()
+def results = c {
+        like("holderFirstName", "Fred%")
+        and {
+                between("balance", 500, 1000)
+                eq("branch", "London")
+        }
+        maxResults(10)
+        order("holderLastName", "desc")
+}
+``` 
+**逻辑与（Conjunctions）和逻辑或（Disjunctions）**
+如前面例子所演示的，你可以用 and { } 块来分组criteria到一个逻辑AND:
+ ```
+and {
+        between("balance", 500, 1000)
+        eq("branch", "London")
+}
+```
+
+逻辑OR也可以这么做:
+ ```
+or {
+        between("balance", 500, 1000)
+        eq("branch", "London")
+}
+```
+
+你也可以用逻辑NOT来否定:
+``` 
+not {
+        between("balance", 500, 1000)
+        eq("branch", "London")
+}
+ ```
+
+**查询关联**
+关联可以通过使用一个跟关联属性同名的节点来查询. 比如我们说 Account 类有关联到多个  Transaction 对象:
+ ```
+class Account {
+    …
+    def hasMany = [transactions:Transaction]
+    Set transactions
+    …
+}
+```
+
+我们可以使用属性名 transaction 作为builder的一个节点来查询这个关联:
+``` 
+def c = Account.createCriteria()
+def now = new Date()
+def results = c.list {
+       transactions {
+            between('date',now-10, now)
+       }
+}
+```
+
+上面的代码将会查找所有过去10天内执行过 transactions 的  Account 实例. 你也可以在逻辑块中嵌套关联查询:
+``` 
+def c = Account.createCriteria()
+def now = new Date()
+def results = c.list {
+     or {
+        between('created',now-10,now)
+        transactions {
+             between('date',now-10, now)
+        }
+     }
+}
+```
+
+这里,我们将找出在最近10天内进行过交易或者最近10天内新创建的所有用户.
+ 
+**投影(Projections)查询**
+
+投影被用于定制查询结果. 要使用投影你需要在criteria builder树里定义一个"projections"节点. projections节点内可用的方法等同于 Hibernate 的 Projections 类中的方法:
+``` 
+def c = Account.createCriteria()
+def numberOfBranches = c.get {
+        projections {
+                countDistinct('branch')
+        }
+}
+``` 
+**使用可滚动的结果**
+
+Y你可以通过调用scroll方法来使用Hibernate的 ScrollableResults 特性:
+``` 
+def results = crit.scroll {
+      maxResults(10)
+}
+def f = results.first()
+def l = results.last()
+def n = results.next()
+def p = results.previous()
+def future = results.scroll(10)
+def accountNumber = results.getLong('number')
+```
+
+下面引用的是Hibernate文档中关于ScrollableResults的描述:
+ >结果集的迭代器（iterator）可以以任意步进的方式前后移动，而Query / ScrollableResults模式跟JDBC的PreparedStatement/ ResultSet也很像，其接口方法名的语意也跟ResultSet的类似.不同于JDBC，结果列的编号是从0开始.
+ 
+**在Criteria实例中设置属性**
+
+如果在builder树内部的一个节点不匹配任何一项特定标准，它将尝试设置为Criteria对象自身的属性。因此允许完全访问这个类的所有属性。下面的例子是在Criteria Criteria实例上调用  setMaxResults 和 setFirstResult:
+ ```
+import org.hibernate.FetchMode as FM
+        …
+        def results = c.list {
+                maxResults(10)
+                firstResult(50)
+                fetchMode("aRelationship", FM.EAGER)
+        }
+ ```
+**立即加载的方式查询**
+在立即加载和延迟加载 这节，我们讨论了如果指定特定的抓取方式来避免N+1查询的问题。这个criteria查询也可以做到:
+``` 
+def criteria = Task.createCriteria()
+def tasks = criteria.list{
+     eq "assignee.id", task.assignee.id
+     join 'assignee'
+     join 'project'
+     order 'priority', 'asc'
+}
+```
+注意这个 join 方法的用法. This method indicates the criteria API that a JOIN query should be used to obtain the results.
+ 
+**方法引用**
+如果你调用一个没有方法名的builder，比如:
+``` 
+c { … }
+```
+
+默认的会列出所有结果，因此上面代码等价于:
+``` 
+c.list { … }
+ ```
+方法 | 描述
+----|----
+list |	这是默认的方法。它会返回所有匹配的行。
+get	 |返回唯一的结果集，比如，就一行。criteria已经规定好了，仅仅查询一行。这个方法更方便，免得使用一个limit来只取第一行使人迷惑。
+scroll |	返回一个可滚动的结果集
+listDistinct  |	如果子查询或者关联被使用，有一个可能就是在结果集中多次出现同一行，这个方法允许只列出不同的条目，它等价于 CriteriaSpecification 类的DISTINCT_ROOT_ENTITY
