@@ -198,6 +198,7 @@ controller - 用于控制器
 domain - 用于domain实体
  
 2.2 多环境配置
+
 Grails支持“多环境配置”的概念。grails-app/conf中的Config.groovy和DataSource.groovy两个文件能够使用ConfigSlurper提供的语法来应用“多环境配置”的特性。以下例子是Grails提供的默认  DataSource 里的定义：
 ```
 dataSource {
@@ -230,6 +231,7 @@ environments {
 注意配置文件的开头部分提供的是公共配置，紧接着的 environments 代码块则指定了用于独立环境配置的数据源信息，包括dbCreate和url属性。这样的语法也可以用与Config.groovy文件。
 
 2.3 数据源
+
 安装数据源需要JDBC驱动，例如使用MySQL数据库，就需要Connector/J这个JDBC驱动。通常这些JDBC驱动都是以JAR文件格式发行的。将需要的JAR文件放到项目的  lib 目录下即可。
 还需在grails-app/conf/DataSource.groovy 的Grails数据库描述文件。这个文件包含了数据源的定义，其中有下列这些设置：
 + driverClassName - JDBC驱动的类名
@@ -252,6 +254,7 @@ dataSource {
 }
 
 2.3.1 数据源和环境
+
 Grails的数据源定义是“环境感知”的，因此你可以针对需要的环境这样配置：
 ``` 
 dataSource {
@@ -267,6 +270,7 @@ environments {
 ```
 
 2.3.2 JNDI 数据源
+
 有时你可能需要通过JNDI去查找一个  数据源。
 Grails支持像下边这样的JNDI数据源定义：
 ```
@@ -275,7 +279,9 @@ dataSource {
 }
 ```
 JNDI的名称格式在不同的容器中会有不同，但是在定义 数据源 的方式上是一致的。
+
 2.3.3 自定义数据库迁移
+
 DataSource的dbCreate属性是非常重要的，它会指示Grails在运行期间使用GORM类来自动生成数据库表。选项如下：
 + create-drop - 当Grails运行的时候删除并且重新创建数据库。
 + create - 如果数据库不存在则创建数据库，存在则不做任何修改。删除现有的数据。
@@ -289,7 +295,9 @@ dataSource {
 }
 ```
 在每次应用程序重启时都会自动删除并重建数据库表。显然，这不应该用于生产环境。
+
 2.4 外部配置
+
 为了支持这种外部配置文件的部署方案，你需要在Config.groovy文件的grails.config.locations设置中指明你的外部配置文件所在位置：
 ```
 grails.config.locations = [ "classpath:${appName}-config.properties",
@@ -318,14 +326,18 @@ class Person {
 id   version   age   last_visit  name
 
 3.2 CURD
+
 **Create** 
+
 为了创建一个 domain 类，可以使用 Groovy new操作符, 设置它的属性并调用 save:
 ```
 def p = new Person(name:"Fred", age:40, lastVisit:new Date())
 p.save()
 save 方法将使用底层的Hibernate ORM持久你的类到数据库中。
 ``` 
+
 **Read**
+
 Grails 会为你的domain类显式的添加一个隐式 id 属性，便于你检索:
 ``` 
 def p = Person.get(1)
@@ -338,18 +350,22 @@ def p = Person.read(1)
 在这种情况下，底层的 Hibernate 引擎不会进行任何脏读检查，对象也不能被持久化。注意,假如你显式的调用 save 方法，对象会回到 read-write 状态.
  
 **Update**
+
 更新一个实体, 设置一些属性，然后，只需再次调用 save:
  ```
 def p = Person.get(1)
 p.name = "Bob"
 p.save()
 ``` 
+
 **Delete**
+
 删除一个实体使用 delete 方法:
  ```
 def p = Person.get(1)
 p.delete()
  ```
+ 
 3.3 **GORM中的关联**
 
 3.3.1 One-to-One
@@ -618,3 +634,261 @@ def author = Author.get(1)
 author.addToBooks(book)
 author.save()
 ```
+
+3.5 **持久化基础**
+
+Grails的底层使用 Hibernate 来进行持久化.本质上,Grails自动绑定Hibernate session到当前正在执行的请求上.这允许你像使用GORM的其他方法一样很自然地使用 save 和 delete 方法.
+
+3.5.1 save and update
+
+下面看一个使用 save 方法的例子:
+ ```
+def p = Person.get(1)
+p.save()
+```
+
+一个主要的不同是当你调用save的时候Hibernate不会执行任何SQL操作. Hibernate通常将SQL语句分批,最后执行他们.对你来说,这些一般都是由Grails自动完成的,它管理着你的Hibernate session.
+也有一些特殊情况,有时候你可能想自己控制那些语句什么时候被执行,或者用Hibernate的术语来说,就是什么时候session被"flushed".要这样的话,你可以对save方法使用flush参数:
+``` 
+def p = Person.get(1)
+p.save(flush:true)
+```
+
+请注意，在这种情况下，所有暂存的SQL语句包括以往的保存将同步到数据库。这也可以让您捕捉任何被抛出的异常，这在涉及乐观锁高度并发的情况下是很常用的：
+``` 
+def p = Person.get(1)
+try {
+        p.save(flush:true)
+}
+catch(Exception e) {
+        // deal with exception
+}
+```
+
+3.5.3 delete
+
+下面是 delete 方法的一个例子:
+ ```
+def p = Person.get(1)
+p.delete()
+```
+
+默认情况下在执行delete以后Grails将使用事务写入, 如果你想在适当的时候删除，这时你可以使用flush 参数:
+``` 
+def p = Person.get(1)
+p.delete(flush:true)
+```
+
+使用 flush 参数也允许您捕获在delete执行过程中抛出的任何异常. 一个普遍的错误就是违犯数据库的约束, 尽管这通常归结为一个编程或配置错误. 下面的例子显示了当您违犯了数据库约束时如何捕捉DataIntegrityViolationException:
+``` 
+def p = Person.get(1)
+try {
+        p.delete(flush:true)
+}
+catch(org.springframework.dao.DataIntegrityViolationException e) {
+        flash.message = "Could not delete person ${p.name}"
+        redirect(action:"show", id:p.id)
+}
+```
+
+注意Grails没有提供 deleteAll 方法,因为删除数据是discouraged的，而且通常可以通过布尔标记/逻辑来避免.
+如果你确实需要批量删除数据,你可以使用 executeUpdate 法来执行批量的DML语句:
+``` 
+Customer.executeUpdate("delete Customer c where c.name = :oldName", [oldName:"Fred"])
+```
+
+3.5.3 级联更新和删除
+
+在使用GORM时,理解如何级联更新和删除是很重要的.需要记住的关键是 belongsTo 的设置控制着哪个类"拥有"这个关联.
+无论是一对一,一对多还是多对多,如果你定义了 belongsTo ,更新和删除将会从拥有类到被它拥有的类(关联的另一方)级联操作.
+如果你 没有 定义 belongsTo 那么就不能级联操作,你将不得不手动保存每个对象.
+下面是一个例子:
+``` 
+class Airport {
+        String name
+        static hasMany = [flights:Flight]
+}
+class Flight {
+        String number
+        static belongsTo = [airport:Airport]
+}
+```
+
+如果我现在创建一个 Airport 对象,并向它添加一些 Flight 它可以保存这个 Airport 并级联保存每个flight,因此会保存整个对象图:
+``` 
+new Airport(name:"Gatwick")
+         .addToFlights(new Flight(number:"BA3430"))
+         .addToFlights(new Flight(number:"EZ0938"))
+         .save()
+```
+
+相反的,如果稍后我删除了这个 Airport 所有跟它关联的  Flight也都将会被删除:
+``` 
+def airport = Airport.findByName("Gatwick")
+airport.delete()
+```
+
+然而,如果我将 belongsTo 去掉的话,上面的级联删除代码就了. 不能工作. 为了更好地理解, take a look at the summaries below that describe the default behaviour of GORM with regards to specific associations.
+ 
++ 设置了belongsTo的双向一对多
+
+``` 
+class A { static hasMany = [bees:B] }
+class B { static belongsTo = [a:A] }
+```
+
+如果是双向一对多，在多的一端设置了belongsTo，那么级联策略将设置一的一端为"ALL"，多的一端为"NONE".
+ 
++ 单向一对多
+
+``` 
+class A { static hasMany = [bees:B] }
+class B {  }
+```
+
+如果是在多的一端没有设置belongsTo单向一对多关联，那么级联策略设置将为"SAVE-UPDATE".
+ 
++ 没有设置belongsTo的双向一对多
+ 
+```
+class A { static hasMany = [bees:B] }
+class B { A a }
+```
+
+如果是在多的一端没有设置belongsTo的双向一对多关联，那么级联策略将为一的一端设置为"SAVE-UPDATE" 为多的一端设置为"NONE".
+ 
++ 设置了belongsTo的单向一对一
+
+``` 
+class A {  }
+class B { static belongsTo = [a:A] }
+```
+
+如果是设置了belongsTo的单向一对一关联，那么级联策略将为有关联的一端(A->B)设置为"ALL"，定义了belongsTo的一端(B->A)设置为"NONE".
+
+3.5.4 立即加载与延迟加载
+
+在GORM中,关联默认是lazy的.最好的解释是例子:
+```
+class Airport {
+        String name
+        static hasMany = [flights:Flight]
+}
+class Flight {
+        String number
+        static belongsTo = [airport:Airport]
+}
+```
+
+上面的domain类和下面的代码:
+``` 
+def airport = Airport.findByName("Gatwick")
+airport.flights.each {
+        println it.name
+}
+```
+
+GORM GORM将会执行一个单独的SQL查询来抓取 Airport 实例,然后再用一个额外的for each查询逐条迭代 flights 关联.换句话说,你得到了N+1条查询.
+根据这个集合的使用频率,有时候这可能是最佳方案.因为你可以指定只有在特定的情况下才访问这个关联的逻辑.
+
++ 配置立即加载
+
+一个可选的方案是使用立即抓取,它可以按照下面的方法来指定:
+``` 
+class Airport {
+        String name
+        static hasMany = [flights:Flight]
+        static mapping = {
+                flight fetch:"join"
+        }
+}
+```
+
+在这种情况下 Airport 实例对应的 flights 关联会被一次性全部加载进来(依赖于映射). 这样的好处是执行更少的查询,但是要小心使用,因为使用太多的eager关联可能会导致你将整个数据库加载进内存. 
+
++ 使用批量加载
+
+虽然立即加载适合某些情况,它并不总是可取的,如果您所有操作都使用立即加载,那么您会将整个数据库加载到内存中,导致性能和内存的问题.替代立即加载是使用批量加载.实际上,您可以在"batches"中配置Hibernate延迟加载. 例如:
+ ```
+class Airport {
+        String name
+        static hasMany = [flights:Flight]
+        static mapping = {
+                flight batchSize:10
+        }
+}
+```
+在这种情况下,由于 batchSize 参数,当您迭代 flights 关联, Hibernate 加载10个批次的结果. 例如，如果您一个 Airport 有30个s, 如果您没有配置批量加载，那么您在对Airport的查询中只能一次查询出一个结果，那么要执行30次查询以加载每个flight. 使用批量加载，您对Airport查询一次将查询出10个Flight，那么您只需查询3次. 换句话说, 批量加载是延迟加载策略的优化. 批量加载也可以配置在class级别:
+ ```
+class Flight {
+        …
+        static mapping = {
+                batchSize 10
+        }
+}
+```
+
+3.5.5 悲观锁与乐观锁
+
++ 乐观锁
+
+默认的GORM类被配置为乐观锁。乐观锁实质上是Hibernate的一个特性，它在数据库里一个特别的 version 字段中保存了一个版本号.
+version 列读取包含当前你所访问的持久化实例的版本状态的  version 属性:
+ ```
+def airport = Airport.get(10)
+println airport.version
+```
+
+当你执行更新操作时，Hibernate将自动检查version属性和数据库中version列，如果他们不同，将会抛出一个 StaleObjectException 异常，并且当前事物也会被回滚.
+这是很有用的，因为它允许你不使用悲观锁(有一些性能上的损失)就可以获得一定的原子性。由此带来的负面影响是，如果你有一些高并发的写操作的话，你必须处理这个异常。这需要刷出(flushing)当前的session:
+``` 
+def airport = Airport.get(10)
+try {
+        airport.name = "Heathrow"
+        airport.save(flush:true)
+}
+catch(org.springframework.dao.OptimisticLockingFailureException e) {
+        // deal with exception
+}
+```
+
+你处理异常的方法取决于你的应用. 你可以尝试合并数据,或者返回给用户并让他们来处理冲突.
+作为选择，如果它成了问题，你可以求助于悲观锁.
+
++ 悲观锁
+
+悲观锁等价于执行一个 SQL "SELECT * FOR UPDATE" 语句并锁定数据库中的一行. 这意味着其他的读操作将会被锁定直到这个锁放开.
+在Grails中悲观锁通过 lock 方法执行:
+``` 
+def airport = Airport.get(10)
+airport.lock() // lock for update
+airport.name = "Heathrow"
+airport.save()
+```
+
+一旦当前事物被提交，Grails会自动的为你释放锁. 可是,在上述情况下我们做的事情是从正规的SELECT“升级”到SELECT ..FOR UPDATE同时其它线程也会在调用get()和lock()之间更新记录。
+为了避免这个问题，你可以使用静态的lock 方法，就像get方法一样传入一个id:
+ ```
+def airport = Airport.lock(10) // lock for update
+airport.name = "Heathrow"
+airport.save()
+```
+
+这个只有 SELECT..FOR UPDATE 时候可以使用.
+ 
+> 尽管Grails和Hibernate支持悲观所，但是在使用Grails内置默认的 HSQLDB 数据库时不支持。如果你想测试悲观锁，你需要一个支持悲观锁的数据库，例如MySQL.
+
+你也可以使用lock 方法在查询中获得悲观锁。例如使用动态查询：
+``` 
+def airport = Airport.findByName("Heathrow", [lock:true])
+```
+
+或者使用criteria:
+``` 
+def airport = Airport.createCriteria().get {
+        eq('name', 'Heathrow')
+        lock true
+} 
+```
+
+####4. GROM 查询
