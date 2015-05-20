@@ -412,6 +412,7 @@ class Nose {
 注意，在这种情况下，我们没有在belongsTo使用map语法声明和明确命名关联。Grails 会把它当做单向。
 
 3.3.2 one-to-many
+
 one-to-many 关联是，当你的一个类，比如 Author ，拥有许多其他类的实体，比如 Book 。 在Grails 中定义这样的关联可以使用 hasMany :
  ```
 class Author {
@@ -465,6 +466,7 @@ class Flight {
 ```
 
 3.3.3 Many-to-Many
+
 Grails支持many-to-many关联，通过在关联双方定义 hasMany ，并在关联拥有方定义 belongsTo :
  ```
 class Book {
@@ -497,6 +499,7 @@ new Book(name:"Groovy in Action")
 3.4 **集合类型**
 
 3.4.1  集合基础
+
 除了关联不同 domain 类外, GORM 同样支持映射基本的集合类型。比如，下面的类创建一个 nicknames 关联， 它是一个  String 的 Set 实体:
 ```
 class Person {
@@ -517,4 +520,101 @@ class Person {
 bunch_o_nicknames |Table
 ------------------|---------------------------
  person_id         |     nickname          
-   1               |      Fred             |
+   1               |      Fred             
+
+3.4.2 Set
+
+默认情况下，在中 GORM定义一个 java.util.Set 映射，它是无序集合，不能包含重复元素。 换句话，当你有:
+```
+class Author {
+   static hasMany = [books:Book]
+}
+```
+GORM会将books注入为  java.util.Set类型。问题在于存取时，这个集合的无序的，可能不是你想要的。为了定制序列，你可以设置为 ` SortedSet`:
+``` 
+class Author {
+   SortedSet books
+   static hasMany = [books:Book]
+}
+```
+在这种情况下，需要实现` java.util.SortedSet` ，这意味着，你的Book类必须实现 `java.lang.Comparable`:
+ ```
+class Book implements Comparable {
+   String title
+   Date releaseDate = new Date()
+   int compareTo(obj) {
+       releaseDate.compareTo(obj.releaseDate)
+   }
+}
+```
+上面的结果是，Author类的中的books集合将按Book的releasedate排序。
+
+3.4.3 List
+
+如果你只是想保持对象的顺序，添加它们和引用它们通过索引，就像array一样，你可以定义你的集合类型为 List:
+ ```
+class Author {
+   List books
+   static hasMany = [books:Book]
+}
+```
+在这种情况下当你向books集合中添加一个新元素时,这个顺序将会保存在一个从0开始的列表索引中,因此你可以:
+ ```
+author.books[0] // get the first book
+```
+这种方法在数据库层的工作原理是:为了在数据库层保存这个顺序,Hibernate创建一个叫做books_idx的列,它保存着该元素在集合中的索引.
+当使用List时,元素在保存之前必须先添加到集合中,否则Hibernate会抛出异常 `(org.hibernate.HibernateException: null index column for collection)`:
+ ```
+// This won't work!
+def book = new Book(title: 'The Shining')
+book.save()
+author.addToBooks(book)
+// Do it this way instead.
+def book = new Book(title: 'Misery')
+author.addToBooks(book)
+author.save()
+```
+
+3.4.4 Map
+
+如果你想要一个简单的 string/value 对map,GROM可以用下面方法来映射:
+```
+class Author {
+   Map books // map of ISBN:book names
+}
+def a = new Author()
+a.books = ["1590597583":"Grails Book"]
+a.save()
+```
+这种情况map的键和值都必须是字符串.
+如果你想用一个对象的map,那么你可以这样做:
+ ```
+class Book {
+  Map authors
+  static hasMany = [authors:Author]
+}
+def a = new Author(name:"Stephen King")
+
+def book = new Book()
+book.authors = [stephen:a]
+book.save()
+```
+static hasMany 属性定义了map中元素的类型,map中的key **必须** 是字符串.
+
+3.4.5 集合类型和性能
+
+Java中的 Set 是一个不能有重复条目的集合类型. 为了确保添加到  Set 关联中的条目是唯一的，Hibernate 首先加载数据库中的全部关联. 如果你在关联中有大量的条目，那么这对性能来说是一个巨大的浪费.
+这样做就需要 List 类型, 因为Hibernate需要加载全部关联以维持供应. 因此如果你希望大量的记录关联，那么你可以制作一个双向关联以便连接能在反面被建立。例如思考一下代码:
+ ```
+def book = new Book(title:"New Grails Book")
+def author = Author.get(1)
+book.author = author
+book.save()
+```
+在这个例子中关联链接被child (Book)创建，因此没有必要手动操作集合以使查询更少和高效代码。由于Author有大量的关联的Book 实例，如果你写入像下面的代码，你可以看到性能的影响：
+ ```
+def book = new Book(title:"New Grails Book")
+def author = Author.get(1)
+author.addToBooks(book)
+author.save()
+```
