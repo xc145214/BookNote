@@ -30,8 +30,8 @@
   
 网页代码优化
 + title 标题
-+ <meta keywords>
-+ <meta description>
++ `<meta keywords>`
++ `<meta description>`
 + 语意化代码
  - H1-h6
  - UL OL
