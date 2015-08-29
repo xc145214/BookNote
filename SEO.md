@@ -38,3 +38,10 @@
  - DL 
  - em strong
  - a 标签 title rel='nofollow'
+
++ 原则
+ - 重要的HTML代码放在前面
+ - 重要内容不要用JS输出
+ - 尽少使用iframe框架
+ - 谨慎使用display:none 用z-index代替
+ - 不断精简页面
