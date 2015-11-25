@@ -1,14 +1,14 @@
 #mongoDB
 
-## °²×°
+## å®‰è£…
 
-+ Æô¶¯·şÎñ£º
++ å¯åŠ¨æœåŠ¡ï¼š
 
 ```
 c:\ENV\MongoDB\Server\3.0\bin>mongod --dbpath "C:\ENV\MongoDB\Server\3.0\data"
 ```
 
-+ ÔËĞĞ£º
++ è¿è¡Œï¼š
 
 ```
 C:\ENV\MongoDB\Server\3.0\bin>mongo.exe
@@ -23,9 +23,9 @@ Questions? Try the support group
 
 ```
 
-## ²Ù×÷
+## æ“ä½œ
 
-+ ´´½¨Êı¾İ¿â
++ åˆ›å»ºæ•°æ®åº“
 
 
 ```
