@@ -23,3 +23,14 @@ Questions? Try the support group
 
 ```
 
+## 操作
+
++ 创建数据库
+
+
+```
+use DATABSE_NAME
+```
+
+
+
