@@ -7,4 +7,4 @@
     * [javascript 权威指南](javascript/javascript 权威指南6.md)
     * [javscript框架设计](javascript/javscript框架设计.md)
 * 数据库
-    * [monogoDB}(database/mongoDB.md)
+    * [monogoDB](database/mongoDB.md)
