@@ -102,3 +102,45 @@ angular对常用的dom事件，xhr事件等做了封装， 在里面触发进入
 
 在AngularJS中，视图模型的继承虽然使得很多时候代码写起来比较方便，但有些时候会造成很多麻烦。
 当编写视图模型代码的时候，应当尽量避免父子作用域存在同名变量的情况，以防止造成隐含的问题。
+
+
+## 4. angular的模块机制
+
+### 4.1 module
+
+在AngularJS中，有module的概念，但是它这个module，跟我们通常在AMD里面看到的module是完全不同的两种东西，大致可以相当于是一个namespace，或者package，表示的是一堆功能单元的集合。
+
+一个比较正式的Angular应用，需要声明一个module，供初始化之用。比如说：
+```
+angular.module("test", [])
+        .controller("TestCtrl", ["$scope", function($scope) {
+            $scope.a = 1;
+        }]);
+```
+随后，可以在HTML中指定这个module：
+```
+<div ng-app="test" ng-controller="TestCtrl">
+    {{a}}
+</div>
+```
+这样，就是以这个div为基准容器，实例化了刚才定义的module。
+
+或者，也可以等价地这样，在这里，我们很清楚地看到，module的意义是用于标识在一个页面中可能包含的多个Angular应用。
+```
+angular.element(document).ready(function() {
+    angular.bootstrap(document.getElementById("app1"), ["test"]);
+    angular.bootstrap(document.getElementById("app2"), ["test"]);
+});
+```
+
+```
+<div id="app1" ng-controller="TestCtrl">
+    {{a}}
+</div>
+<div id="app2" ng-controller="TestCtrl">
+    {{a}}
+</div>
+```
+这样可以在同一个页面中创建同一module的不同实例。两个应用互不干涉，在各自的容器中运行。
+
+### 4.2 module的依赖项
