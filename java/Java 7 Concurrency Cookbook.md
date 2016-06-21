@@ -110,7 +110,7 @@ Java 也提供机制来捕捉和处理这些异常 。有些一定要被捕捉�
 Java提供一个接口， ThreadFactory 接口实现一个线程对象工厂。 并发 API 使用线程工厂来创建线程的一些基本优势。
 
 
-## 基本线程同步
+## 2. 基本线程同步
 
 在并发编程中发生的最常见的一种情况是超过一个执行线程使用共享资源。在并发应用程序中，多个线程读或写相同的数据或访问同一文件或数据库连接这是正常的。这些共享资源会引发错误或数据不一致的情况，我们必须通过一些机制来避免这些错误。
 
@@ -130,3 +130,164 @@ Java(和 几乎所有的编程语言)提供同步机制，帮助程序员实现�
 换句话说，每个方法声明为synchronized关键字是一个临界区，Java只允许一个对象执行其中的一个临界区。
 
 静态方法有不同的行为。只有一个执行线程访问被synchronized关键字声明的静态方法，但另一个线程可以访问该类的一个对象中的其他非静态的方法。 你必须非常小心这一点，因为两个线程可以访问两个不同的同步方法，如果其中一个是静态的而另一个不是。如果这两种方法改变相同的数据,你将会有数据不一致 的错误。
+
+
+**在同步的类里安排独立属性**
+
+当你使用synchronized关键字来保护代码块时，你必须通过一个对象的引用作为参数。通常，你将会使用this关键字来引用执行该方法的对象，但是你也可以使用其他对象引用。通常情况下，这些对象被创建只有这个目的。比如，你在一个类中有被多个线程共享的两个独立属性。你必须同步访问每个变量，如果有一个线程访问一个属性和另一个线程在同一时刻访问另一个属性，这是没有问题的。
+
+**在同步代码中使用条件**
+
+在并发编程中的一个经典问题是生产者与消费者问题，我们有一个数据缓冲区，一个或多个数据的生产者在缓冲区存储数据，而一个或多个数据的消费者，把数据从缓冲区取出。
+
+由于缓冲区是一个共享的数据结构，我们必须采用同步机制，比如synchronized关键字来控制对它的访问。但是我们有更多的限制因素，如果缓冲区是满的，生产者不能存储数据，如果缓冲区是空的，消费者不能取出数据。
+
+对于这些类型的情况，Java在Object对象中提供wait()，notify()，和notifyAll() 方法的实现。一个线程可以在synchronized代码块中调用wait()方法。如果在synchronized代码块外部调用wait()方法，JVM会抛出IllegalMonitorStateException异常。当线程调用wait()方法，JVM让这个线程睡眠，并且释放控制 synchronized代码块的对象，这样，虽然它正在执行但允许其他线程执行由该对象保护的其他synchronized代码块。为了唤醒线程，你必 须在由相同对象保护的synchronized代码块中调用notify()或notifyAll()方法。
+
+**使用Lock同步代码块**
+
+Java提供另外的机制用来同步代码块。它比synchronized关键字更加强大、灵活。它是基于Lock接口和实现它的类（如ReentrantLock）。这种机制有如下优势：
+
++ 它允许以一种更灵活的方式来构建synchronized块。使用synchronized关键字，你必须以结构化方式得到释放synchronized代码块的控制权。Lock接口允许你获得更复杂的结构来实现你的临界区。
++ Lock 接口比synchronized关键字提供更多额外的功能。新功能之一是实现的tryLock()方法。这种方法试图获取锁的控制权并且如果它不能获取该锁，是因为其他线程在使用这个锁，它将返回这个锁。使用synchronized关键字，当线程A试图执行synchronized代码块，如果线程B正在执行它，那么线程A将阻塞直到线程B执行完synchronized代码块。使用锁，你可以执行tryLock()方法，这个方法返回一个 Boolean值表示，是否有其他线程正在运行这个锁所保护的代码。
++ 当有多个读者和一个写者时，Lock接口允许读写操作分离。
++ Lock接口比synchronized关键字提供更好的性能。
+
+**使用读/写锁同步数据访问**
+
+锁所提供的最重要的改进之一就是ReadWriteLock接口和唯一 一个实现它的ReentrantReadWriteLock类。这个类提供两把锁，一把用于读操作和一把用于写操作。同时可以有多个线程执行读操作，但只有一个线程可以执行写操作。当一个线程正在执行一个写操作，不可能有任何线程执行读操作。
+
+
+**修改Lock的公平性**
+
+在ReentrantLock类和 ReentrantReadWriteLock类的构造器中，允许一个名为fair的boolean类型参数，它允许你来控制这些类的行为。默认值为 false，这将启用非公平模式。在这个模式中，当有多个线程正在等待一把锁（ReentrantLock或者 ReentrantReadWriteLock），这个锁必须选择它们中间的一个来获得进入临界区，选择任意一个是没有任何标准的。true值将开启公平 模式。在这个模式中，当有多个线程正在等待一把锁（ReentrantLock或者ReentrantReadWriteLock），这个锁必须选择它们 中间的一个来获得进入临界区，它将选择等待时间最长的线程。考虑到之前解释的行为只是使用lock()和unlock()方法。由于tryLock()方 法并不会使线程进入睡眠，即使Lock接口正在被使用，这个公平属性并不会影响它的功能。
+
+**在Lock中使用多个条件**
+
+一个锁可能伴随着多个条件。这些条件声明在Condition接口中。 这些条件的目的是允许线程拥有锁的控制并且检查条件是否为true，如果是false，那么线程将被阻塞，直到其他线程唤醒它们。Condition接口提供一种机制，阻塞一个线程和唤醒一个被阻塞的线程。
+
+所有Condition对象都与锁有关，并且使用声明在Lock接口中的newCondition()方法来创建。使用condition做任何操作之前， 你必须获取与这个condition相关的锁的控制。所以，condition的操作一定是在以调用Lock对象的lock()方法为开头，以调用相同 Lock对象的unlock()方法为结尾的代码块中。
+
+当一个线程在一个condition上调用await()方法时，它将自动释放锁的控制，所以其他线程可以获取这个锁的控制并开始执行相同操作，或者由同个锁保护的其他临界区。
+
+> 注释：当一个线程在一个condition上调用signal()或signallAll()方法，一个或者全部在这个condition上等待的线程将被唤醒。这并不能保证的使它们现在睡眠的条件现在是true，所以你必须在while循环内部调用await()方法。你不能离开这个循环，直到 condition为true。当condition为false，你必须再次调用 await()方法。
+
+你必须十分小心 ，在使用await()和signal()方法时。如果你在condition上调用await()方法而却没有在这个condition上调用signal()方法，这个线程将永远睡眠下去。
+
+在调用await()方法后，一个线程可以被中断的，所以当它正在睡眠时，你必须处理InterruptedException异常。
+
+Condition接口提供不同版本的await()方法，如下：
+
++ await(long time, TimeUnit unit):这个线程将会一直睡眠直到：
+
+(1)它被中断
+
+(2)其他线程在这个condition上调用singal()或signalAll()方法
+
+(3)指定的时间已经过了
+
+(4)TimeUnit类是一个枚举类型如下的常量：
+
+`DAYS,HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS,SECONDS`
+
++ awaitUninterruptibly():这个线程将不会被中断，一直睡眠直到其他线程调用signal()或signalAll()方法
++ awaitUntil(Date date):这个线程将会一直睡眠直到：
+
+(1)它被中断
+
+(2)其他线程在这个condition上调用singal()或signalAll()方法
+
+(3)指定的日期已经到了
+
+你可以在一个读/写锁中的ReadLock和WriteLock上使用conditions。
+
+## 3. 线程同步工具
+
+在第二章基本的线程同步中，我们学习了同步和critical section的内容。基本上，当多个并发任务共享一个资源时就称为同步，例如：一个对象或者一个对象的属性。访问这个资源的代码块称为：临界区。
+
+如果机制没有使用恰当，那么可能会导致错误的结果，或者数据不一致，又或者出现异常情况。所以必须采取java语言提供的某个恰当的同步机制来避免这些问题。
+
+在第二章，基本的线程同步中，我们学会了以下2个同步机制：
+
++ 关键词同步
++ Lock接口和它的实现类们：ReentrantLock, ReentrantReadWriteLock.ReadLock, 和 ReentrantReadWriteLock.WriteLock
+
+在此章节，我们将学习怎样使用高等级的机制来达到多线程的同步。这些高等级机制有：
+
++ Semaphores: 控制访问多个共享资源的计数器。此机制是并发编程的最基本的工具之一，而且大部分编程语言都会提供此机制。
++ CountDownLatch: CountDownLatch 类是Java语言提供的一个机制，它允许线程等待多个操作的完结。
++ CyclicBarrier: CyclicBarrier 类是又一个java语言提供的机制，它允许多个线程在同一个点同步。
++ Phaser: Phaser类是又一个java语言提供的机制，它控制并发任务分成段落来执行。全部的线程在继续执行下一个段之前必须等到之前的段执行结束。这是Java 7 API的一个新特性。
++ Exchanger: Exchanger类也是java语言提供的又一个机制，它提供2个线程间的数据交换点。
+
+Semaphores是最基本的同步机制可以用来在任何问题中保护任何critical section。其他的机制只有在之前描述的那些有特殊特点的应用中使用。请根据你的应用的特点来选择适当的机制。
+
+**控制并发访问资源**
+
+Semaphore(信号量)是一个控制访问多个共享资源的计数器。
+
+Semaphore的内容是由Edsger Dijkstra引入并在 THEOS操作系统上第一次使用。
+
+当一个线程想要访问某个共享资源，首先，它必须获得semaphore。如果semaphore的内部计数器的值大于0，那么semaphore减少计数器的值并允许访问共享的资源。计数器的值大于0表示，有可以自由使用的资源，所以线程可以访问并使用它们。
+
+另一种情况，如果semaphore的计数器的值等于0，那么semaphore让线程进入休眠状态一直到计数器大于0。计数器的值等于0表示全部的共享资源都正被线程们使用，所以此线程想要访问就必须等到某个资源成为自由的。
+
+当线程使用完共享资源时，他必须放出semaphore为了让其他线程可以访问共享资源。这个操作会增加semaphore的内部计数器的值。
+
+**控制并发访问多个资源**
+
+在并发访问资源的控制中，你学习了信号量（semaphores）的基本知识。
+
+在上个指南，你实现了使用binary semaphores的例子。那种semaphores是用来保护访问一个共享资源的，或者说一个代码片段每次只能被一个线程执行。但是semaphores也可以用来保护多个资源的副本，也就是说当你有一个代码片段每次可以被多个线程执行。
+
+**等待多个并发事件完成**
+
+Java并发API提供这样的类，它允许1个或者多个线程一直等待，直到一组操作执行完成。 这个类就是CountDownLatch类。它初始一个整数值，此值是线程将要等待的操作数。当某个线程为了想要执行这些操作而等待时， 它要使用 await()方法。此方法让线程进入休眠直到操作完成。 当某个操作结束，它使用countDown() 方法来减少CountDownLatch类的内部计数器。当计数器到达0时，这个类会唤醒全部使用await() 方法休眠的线程们。
+
+
+CountDownLatch类有3个基本元素：
+
++ 初始值决定CountDownLatch类需要等待的事件的数量。
++ await() 方法, 被等待全部事件终结的线程调用。
++ countDown() 方法，事件在结束执行后调用。
+
+当创建 CountDownLatch 对象时，对象使用构造函数的参数来初始化内部计数器。每次调用 countDown() 方法, CountDownLatch 对象内部计数器减一。当内部计数器达到0时， CountDownLatch 对象唤醒全部使用 await() 方法睡眠的线程们。
+
+不可能重新初始化或者修改CountDownLatch对象的内部计数器的值。一旦计数器的值初始后，唯一可以修改它的方法就是之前用的 countDown() 方法。当计数器到达0时， 全部调用 await() 方法会立刻返回，接下来任何countDown() 方法的调用都将不会造成任何影响。
+
+此方法与其他同步方法有这些不同：
+
++ CountDownLatch 机制不是用来保护共享资源或者临界区。它是用来同步一个或者多个执行多个任务的线程。它只能使用一次。像之前解说的，一旦CountDownLatch的计数器到达0，任何对它的方法的调用都是无效的。如果你想再次同步，你必须创建新的对象。
+
+
+**在同一个点同步任务**
+
+Java 并发 API 提供了可以允许2个或多个线程在在一个确定点的同步应用。它是 CyclicBarrier 类。此类与在此章节的等待多个并发事件完成指南中的 CountDownLatch 类相似，但是它有一些特殊性让它成为更强大的类。
+
+CyclicBarrier 类有一个整数初始值，此值表示将在同一点同步的线程数量。当其中一个线程到达确定点，它会调用await() 方法来等待其他线程。当线程调用这个方法，CyclicBarrier阻塞线程进入休眠直到其他线程到达。当最后一个线程调用CyclicBarrier 类的await() 方法，它唤醒所有等待的线程并继续执行它们的任务。
+
+CyclicBarrier 类有个有趣的优势是，你可以传递一个外加的 Runnable 对象作为初始参数，并且当全部线程都到达同一个点时，CyclicBarrier类 会把这个对象当做线程来执行。此特点让这个类在使用 divide 和 conquer 编程技术时，可以充分发挥任务的并行性，
+
+CyclicBarrier 类有另一个版本的 await() 方法:
+
++ await(long time, TimeUnit unit): 线程会一直休眠直到被中断；内部计数器到达0，或者特定的时间过去了。TimeUnit类有多种常量： DAYS, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, and SECONDS.
+此类也提供了 getNumberWaiting() 方法，返回被 await() 方法阻塞的线程数，还有 getParties() 方法，返回将与CyclicBarrier同步的任务数。
+
++ 重置 CyclicBarrier 对象
+
+CyclicBarrier 类与CountDownLatch有一些共同点，但是也有一些不同。最主要的不同是，CyclicBarrier对象可以重置到它的初始状态，重新分配新的值给内部计数器，即使它已经被初始过了。
+
+可以使用 CyclicBarrier的reset() 方法来进行重置操作。当这个方法被调用后，全部的正在await() 方法里等待的线程接收到一个 BrokenBarrierException 异常。此异常在例子中已经用打印stack trace处理了，但是在一个更复制的应用，它可以执行一些其他操作，例如重新开始执行或者在中断点恢复操作。
+
++ 破坏 CyclicBarrier 对象 
+
+CyclicBarrier 对象可能处于一个特殊的状态，称为 broken。当多个线程正在 await() 方法中等待时，其中一个被中断了，此线程会收到 InterruptedException 异常，但是其他正在等待的线程将收到 BrokenBarrierException 异常，并且 CyclicBarrier 会被置于broken 状态中。
+
+CyclicBarrier 类提供了isBroken() 方法，如果对象在 broken 状态，返回true，否则返回false。
+
+
+**运行阶段性并发任务**
+
+Java 并发 API 提供的一个非常复杂且强大的功能是，能够使用Phaser类运行阶段性的并发任务。当某些并发任务是分成多个步骤来执行时，那么此机制是非常有用的。Phaser类提供的机制是在每个步骤的结尾同步线程，所以除非全部线程完成第一个步骤，否则线程不能开始进行第二步。
+
+相对于其他同步应用，我们必须初始化Phaser类与这次同步操作有关的任务数，我们可以通过增加或者减少来不断的改变这个数。
