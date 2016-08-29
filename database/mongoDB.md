@@ -71,15 +71,34 @@ MongoDB的文件单个大小不超过4M，但是新版本后可提升到16M
 
 + 启动服务：
 
+创建配置文件:
+
 ```
-c:\ENV\MongoDB\Server\3.0\bin>mongod --dbpath "C:\ENV\MongoDB\Server\3.0\data"
+# 数据文件
+dbpath=D:\Program Files\MongoDB\Server\3.2\data\db
+# 日志文件
+logpath=D:\Program Files\MongoDB\Server\3.2\data\log\mangodb.log
+```
+
+安装服务： 
+
+```
+mongod --config "D:\Program Files\MongoDB\Server\3.2\mongo.config" --install --serviceName "MongoDB"
+```
+
+启动服务：
+
+```
+net start MongoDB
 ```
 
 + 运行：
 
 ```
-C:\ENV\MongoDB\Server\3.0\bin>mongo.exe
-MongoDB shell version: 3.0.7
+D:\Program Files\MongoDB\Server\3.2\bin>mongo
+2016-08-29T17:01:32.157+0800 I CONTROL  [main] Hotfix KB2731284 or later update
+is not installed, will zero-out data files
+MongoDB shell version: 3.2.9
 connecting to: test
 Welcome to the MongoDB shell.
 For interactive help, type "help".
@@ -87,7 +106,6 @@ For more comprehensive documentation, see
         http://docs.mongodb.org/
 Questions? Try the support group
         http://groups.google.com/group/mongodb-user
-
 ```
 
 + 查看
