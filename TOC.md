@@ -9,6 +9,6 @@
 * 数据库
     * [monogoDB](database/mongoDB.md)
     * [redis](database/redis.md)
-    * [mysql lock read ](database/mysql-lock-read.md)
+    * [mysql 读锁 ](database/mysql-lock-read.md)
 * web
     * [session cookie token](web/session cookie token.md)
