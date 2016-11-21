@@ -12,3 +12,5 @@
     * [mysql 读锁 ](database/mysql-lock-read.md)
 * web
     * [session cookie token](web/session cookie token.md)
+* other
+    * [SEO](other/SEO.md)
