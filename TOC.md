@@ -14,3 +14,5 @@
     * [session cookie token](web/session cookie token.md)
 * other
     * [SEO](other/SEO.md)
+    * [Git使用](other/Git使用.md)
+    * [Git 常用命令](other/Git 常用命令.md)
