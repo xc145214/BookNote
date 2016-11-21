@@ -1,6 +1,7 @@
-#javascript权威指南
+# javascript权威指南
 
 =====
+
 ### 1.javascript 概述
 
 ##1.1 语言核心
