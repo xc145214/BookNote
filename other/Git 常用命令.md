@@ -149,4 +149,7 @@ $ git push origin <local_branch_name>:<remote_branch_name>
 git 
 # 删除远程分支
 $ git push origin :develop
+
+# 拉取远程分支到本地创建新分支
+$ git fetch origin reomte_branch:local_branch
 ```

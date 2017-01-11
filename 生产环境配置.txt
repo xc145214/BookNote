@@ -1,0 +1,4 @@
+##==========ali-odps===============##
+odps.url=jdbc:odps:https://service.odps.aliyun.com/api?project=datacenter_my089&charset=UTF-8
+odps.access_id=Ox32BtQbkf6SMct6
+odps.access_key=hKzKlqDMVgvrKeW21Z5kcnHCPZEZLI
