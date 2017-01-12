@@ -151,5 +151,12 @@ git
 $ git push origin :develop
 
 # 拉取远程分支到本地创建新分支
-$ git fetch origin reomte_branch:local_branch
+$ git fetch origin reomte_branch:local_branch_name
+$ git checkout -b local_branch_name origin/remote_branch_name
+```
+
+## git 管理文件
+```
+# git 将文件恢复成服务器版本
+$ git checkout file_path
 ```
