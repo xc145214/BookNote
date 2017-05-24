@@ -1,13 +1,13 @@
 # javascript权威指南
 
-=====
+[TOC]
 
-### 1.javascript 概述
+## 1.javascript 概述
 
-##1.1 语言核心
+### 1.1 语言核心
 
 变量与赋值
-```
+```javascript
 //单行注释
 
 /**
@@ -33,7 +33,7 @@ x = underfined; //类似null
 ```
 
 对象与数组
-```
+```javascript
 //javascript 中最重要的类型是对象 对象是名/值对的集合或者字符串映射到值得集合
 var book = {        //定义对象，以{}形式
   topic : "javaScript",     //属性的值
@@ -68,7 +68,7 @@ var data = {                //包含两个属性的对象
 ```
 
 运算符
-```
+```javascript
 // 运算符作用于操作数，生成一个新的值
 3 + 2                       // =>5 加法
 3 - 2                       // =>1 减法
@@ -104,7 +104,7 @@ false == (x > y)      //true:false与false相等
 ```
 
 函数
-```
+```javascript
 //函数是一段带有参数的代码段，可以被多次调用
 function plus1(x){  //定义函数
   return x + 1;     //返回值
@@ -119,7 +119,7 @@ square(plus(y)) //=> 16
 ```
 
 函数与对象写时就变成了方法：
-```
+```javascript
 //当函数赋值给对象的属性时，成为方法，所有的javascript对象都有方法
 var a = [];               //创建数组
 a.push(1,2,3);            //数组的方法push：添加元素
@@ -141,7 +141,7 @@ points.dist()               //=>1.4142135623730951
 ```
 
 控制语句
-```
+```javascript
 //判断与循环
 //绝对值函数
 function abs(x){
@@ -174,7 +174,7 @@ fatorial2(5)      //=>120:1*2*3*4*5
 ```
 
 面向对象
-```
+```javascript
 //定义一个构造函数以初始化一个新的对象
 function Point(x,y){        //按照惯例，构造函数以大写字母开头
   this.x = x;               //this指代初始化的实例，将函数的参数存储为对象的属性
@@ -193,7 +193,7 @@ Point.prototype.r = function(){
 p.r()           //=>1.4142135623730951
 ```
 
-### 2.javascript 词法结构
+## 2.javascript 词法结构
 
 + javascript程序使用Unicode字符集编写。
 + javascript区分大小写，html不区分大小写
@@ -201,7 +201,7 @@ p.r()           //=>1.4142135623730951
 + 保留字：
 
 
-### 3.类型 值和变量
+## 3.类型 值和变量
 
 + javascript的数据类型分为原始类型和对象类型
 + 原始类型：数字 字符串 布尔值及特殊的null 和 underfine
