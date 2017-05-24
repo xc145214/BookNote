@@ -1,8 +1,8 @@
-#Grails in Action
+# Grails in Action
 
 [TOC]
 
-##1. 入门
+## 1. 入门
 
 ### 1.1 下载与安装
 + 下载安装包
