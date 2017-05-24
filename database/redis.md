@@ -1,8 +1,10 @@
 # redis
 
-## 1. redis 安装
+[TOC]
 
-### window版 
+## redis 安装
+
+** window版**
 
 [下载地址](https://github.com/MSOpenTech/redis/releases)
 
@@ -75,12 +77,11 @@ appendonly no
 + Dump持久化是把内存中的数据完整写入到数据文件,由配置策略触发写入,如果在数据更改后又未达到触发条件而发生故障会造成部分数据丢失。
 + AOF持久化是日志存储的,是增量的形式,记录每一个数据操作动作,数据恢复时就根据这些日志来生成。
 
-### 命令行操作
+## 命令行操作
 
 使用CMD命令提示符,打开redis-cli连接redis服务器 ,也可以使用telnet客户端
-    
+
 `redis-cli -h 服务器 –p 端口 –a 密码`
-    
 `redis-cli.exe -h 127.0.0.1 -p 6379`
 
 以下是一些服务器管理常用命令:

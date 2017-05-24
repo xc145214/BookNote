@@ -1,5 +1,7 @@
 # Java 7 并发指南
 
+[TOC]
+
 ## 1. 线程管理
 
 现代所有的操作系统都允许并发地执行任务。这种并发是**进程级别**的并发。
@@ -19,7 +21,7 @@
 + Priority: 线程对象的优先级。优先级别在1-10之间，1是最低级，10是最高级。不建议改变它们的优先级，但是你想的话也是可以的。
 + Status: 线程的状态。在Java中，线程只能有这6种中的一种状态： new, runnable, blocked, waiting, time waiting, 或 terminated.
 
-**线程的终端**
+**线程的中断**
 
 一个多个线程在执行的Java程序，只有当其全部的线程执行结束时（更具体的说，是所有非守护线程结束或者某个线程调用System.exit()方法的时候），它才会结束运行。有时，你需要为了终止程序而结束一个线程，或者当程序的用户想要取消某个Thread对象正在做的任务。
 
@@ -41,7 +43,7 @@ Java提供中断机制来通知线程表明我们想要结束它。中断机制�
 
 Java 提供2种形式的 join() 方法:
 
-```
+```java
 join (long milliseconds)
 join (long milliseconds, long nanos)
 ```
@@ -57,7 +59,7 @@ join (long milliseconds, long nanos)
 
 **守护线程的创建和运行**
 
-ava有一种特别的线程叫做守护线程。这种线程的优先级非常低，通常在程序里没有其他线程运行时才会执行它。当守护线程是程序里唯一在运行的线程时，JVM会结束守护线程并终止程序。
+java有一种特别的线程叫做守护线程。这种线程的优先级非常低，通常在程序里没有其他线程运行时才会执行它。当守护线程是程序里唯一在运行的线程时，JVM会结束守护线程并终止程序。
 
 根据这些特点，守护线程通常用于在同一程序里给普通线程（也叫使用者线程）提供服务。它们通常无限循环的等待服务请求或执行线程任务。它们不能做重要的任务，因为我们不知道什么时候会被分配到CPU时间片，并且只要没有其他线程在运行，它们可能随时被终止。JAVA中最典型的这种类型代表就是垃圾回收器。
 
@@ -67,7 +69,7 @@ Java里有2种异常:
 
 + 检查异常（Checked exceptions）: 这些异常必须强制捕获它们或在一个方法里的throws子句中。 例如， IOException 或者ClassNotFoundException。
 + 未检查异常（Unchecked exceptions）: 这些异常不用强制捕获它们。例如， NumberFormatException。
-在一个线程 对象的 run() 方法里抛出一个检查异常，我们必须捕获并处理他们。因为 run() 方法不接受 throws 子句。当一个非检查异常被抛出，默认的行为是在控制台写下stack trace并退出程序。
+  在一个线程 对象的 run() 方法里抛出一个检查异常，我们必须捕获并处理他们。因为 run() 方法不接受 throws 子句。当一个非检查异常被抛出，默认的行为是在控制台写下stack trace并退出程序。
 
 幸运的是, Java 提供我们一种机制可以捕获和处理线程对象抛出的未检测异常来避免程序终结。
 
@@ -107,7 +109,7 @@ Java 也提供机制来捕捉和处理这些异常 。有些一定要被捕捉�
 + 更简单的改变了类的对象创建或者说创建这些对象的方式。
 + 更简单的为了限制的资源限制了对象的创建。 例如， 我们只new一个此类型的对象。
 + 更简单的生成创建对象的统计数据。
-Java提供一个接口， ThreadFactory 接口实现一个线程对象工厂。 并发 API 使用线程工厂来创建线程的一些基本优势。
+  Java提供一个接口， ThreadFactory 接口实现一个线程对象工厂。 并发 API 使用线程工厂来创建线程的一些基本优势。
 
 
 ## 2. 基本线程同步
@@ -271,7 +273,7 @@ CyclicBarrier 类有个有趣的优势是，你可以传递一个外加的 Runna
 CyclicBarrier 类有另一个版本的 await() 方法:
 
 + await(long time, TimeUnit unit): 线程会一直休眠直到被中断；内部计数器到达0，或者特定的时间过去了。TimeUnit类有多种常量： DAYS, HOURS, MICROSECONDS, MILLISECONDS, MINUTES, NANOSECONDS, and SECONDS.
-此类也提供了 getNumberWaiting() 方法，返回被 await() 方法阻塞的线程数，还有 getParties() 方法，返回将与CyclicBarrier同步的任务数。
+  此类也提供了 getNumberWaiting() 方法，返回被 await() 方法阻塞的线程数，还有 getParties() 方法，返回将与CyclicBarrier同步的任务数。
 
 + 重置 CyclicBarrier 对象
 
@@ -437,7 +439,7 @@ Fork/Join框架的核心是由以下两个类：
 + 你将使用默认构造器创建ForkJoinPool。
 + 在这个任务中，你将使用Java API文档推荐的结构：
 
-```
+```java
 If (problem size > default size){
     tasks=divide(task);
     execute(tasks);
@@ -454,7 +456,7 @@ Fork/Join框架提供了执行返回一个结果的任务的能力。这些任�
 
 在任务中，你必须使用Java API方法推荐的结构：
 
-```
+```java
 If (problem size > size){
     tasks=Divide(task);
     execute(tasks);
@@ -624,9 +626,9 @@ Java 在原子类中实现了CAS机制。这些类提供了compareAndSet() 方�
 Java 中还引入了原子Array，用来实现Integer类型和Long类型数组的操作。
 
 
-# 7. 定制并发类
+## 7. 定制并发类
 
-ava 并发API提供许多接口和类来实现并发应用程序。它们提供底层（low-level）机制，如Thread类、Runnable或Callable接口、或synchronized关键字。同样也提供高级（high-level）机制，如Executor框架和Java 7 发布的Fork/Join框架。尽管这样，你可能发现你自己开发一个程序时，没有一个java类能满足你的需求。
+java 并发API提供许多接口和类来实现并发应用程序。它们提供底层（low-level）机制，如Thread类、Runnable或Callable接口、或synchronized关键字。同样也提供高级（high-level）机制，如Executor框架和Java 7 发布的Fork/Join框架。尽管这样，你可能发现你自己开发一个程序时，没有一个java类能满足你的需求。
 
 在这种情况下，你也许需要基于Java提供的（API）实现自己定制的并发工具。基本上，你可以：
 

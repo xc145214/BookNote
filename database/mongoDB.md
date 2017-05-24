@@ -1,5 +1,7 @@
 #mongoDB
 
+[TOC]
+
 ## 为什么我们要使用MongoDB？
 
 ### 特点
@@ -50,7 +52,7 @@
 
 MongoDB中存储的对象时BSON，是一种类似JSON的二进制文件，它是由许多的键值对组成。如下所示
 
-```
+```json
 {  
 "name" : "huangz",  
 "age" : 20,  
@@ -69,7 +71,7 @@ MongoDB中存储的对象时BSON，是一种类似JSON的二进制文件，它�
 MongoDB的文件单个大小不超过4M，但是新版本后可提升到16M
 ## 安装
 
-+ 启动服务：
+### 启动服务
 
 创建配置文件:
 
@@ -92,7 +94,7 @@ mongod --config "D:\Program Files\MongoDB\Server\3.2\mongo.config" --install --s
 net start MongoDB
 ```
 
-+ 运行：
+### 运行
 
 ```
 D:\Program Files\MongoDB\Server\3.2\bin>mongo
@@ -108,14 +110,14 @@ Questions? Try the support group
         http://groups.google.com/group/mongodb-user
 ```
 
-+ 查看
+### 查看
 
 mongodb采用27017端口，那么我们就在浏览器里面键入“http://localhost:27017/”，打开后，mongodb告诉我们在27017上Add 1000可以用http模式查看mongodb的管理信息。
 
 
 ## 操作
 
-+ 导入数据
+### 导入数据
 
 ```
 mongoimport --db test --collection restaurants --drop --file primer-dataset.json
@@ -124,14 +126,14 @@ mongoimport --db test --collection restaurants --drop --file primer-dataset.json
 
 打开cmd,输入mongo命令打开shell，其实这个shell就是mongodb的客户端，同时也是一个js的编译器，默认连接的是“test”数据库。
 
-+ 创建数据库
+###  创建数据库
 
 如果数据库不存在，则创建数据库，否则切换到指定数据库。
 ```
 use person
 ```
 
-+ 删除数据库
+### 删除数据库
 
 ```
 //切换
@@ -211,29 +213,29 @@ db.xingootest.drop()
 db.dropDatabase()
 
 ## MongoDB增删改命令
- 
+
  1 #存储嵌套的对象
- 
+
  db.foo.save({'name':xingoo,'age':25,'address':{'city':'changchun','Province':'Jilin'}})
- 
+
  2 #存储数组对象
- 
+
  db.foo.save({'name':xingoo,'age':25,'address':['Jilin Province','Liaoning Province']})
- 
+
  3 #根据query条件修改，如果不存在则插入，允许修改多条记录
- 
+
  db.foo.update({'age':'25'},{'$set':{'name':'xingoo'}},upsert=true,multi=true)
- 
+
  4 #删除yy=5的记录
- 
+
  db.foo.remove({'name':'xingoo'})
- 
+
  5 #删除所有的记录
- 
+
  db.foo.remove()
+
  
- 
- 
+
 ## 索引
 
 1 #增加索引:1 asc -1 desc

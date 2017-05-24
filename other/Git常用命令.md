@@ -1,5 +1,7 @@
 # Git 常用命令
 
+[TOC]
+
 ## 新建代码库
 ```
 # 在当前目录创建新的 git 代码库
@@ -135,7 +137,7 @@ $ git remote prune origin
 # 推送到默认远程分支
 $ git push origin master
 
-# 创建新分支并推送
+# 创建新分支并推送-
 $ git push origin develop
 
 # 拉取服务器特定分支
@@ -149,4 +151,68 @@ $ git push origin <local_branch_name>:<remote_branch_name>
 git 
 # 删除远程分支
 $ git push origin :develop
+
+# 拉取远程分支到本地创建新分支
+$ git fetch origin reomte_branch:local_branch_name
+$ git checkout -b local_branch_name origin/remote_branch_name
 ```
+
+## git 管理文件
+```
+# git 将文件恢复成服务器版本
+$ git checkout file_path
+```
+
+
+## Git 使用规范流程
+```
+# 新建分支
+
+# 获取主干最新代码
+$ git checkout master
+$ git pull
+
+# 新建一个开发分支 myfeature
+$ git checkout -b myfeatur
+
+# 提交分支commit
+
+$ git add -all
+$ git status
+$ git commit --verbose
+
+# 撰写提交信息
+
+Present-tense summary under 50 characters
+
+* More information about commit (under 72 characters).
+* More information about commit (under 72 characters).
+
+http://project.management-system.com/ticket/123
+
+# 与主干合并
+
+$ git fetch origin
+$ git rebase origin/master
+
+# 合并commit
+
+$ git rebase -i origin/master
+
+$ git reset HEAD~5
+$ git add .
+$ git commit -am "Here's the bug fix that closes #28"
+$ git push --force
+
+
+$ git commit --fixup  
+$ git rebase -i --autosquash 
+
+# 推送到远程分支
+
+$ git push --force origin myfeature
+
+# 发出Pull Request
+```
+
+
