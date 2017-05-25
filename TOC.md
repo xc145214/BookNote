@@ -4,6 +4,9 @@
 * java
     * [grails](java/Groovy-Grails-in-Action.md)
     * [java 7 并发指南](java/Java7-Concurrency-Cookbook.md)
+    * [HashMap 原理](java/HashMap.md)
+    * [HashSet 原理](java/HashSet.md)
+    * [HashTable 原理](java/HashTable.md)
 * javascript
     * [javascript 权威指南](javascript/javascript权威指南6.md)
     * [javscript框架设计](javascript/javscript框架设计.md)
