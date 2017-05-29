@@ -1,12 +1,17 @@
 # Summary
 
 * [介绍](README.md)
-* java
+* Books
     * [grails](java/Groovy-Grails-in-Action.md)
     * [java 7 并发指南](java/Java7-Concurrency-Cookbook.md)
+* java
+    * [ArrayList 原理](java/ArrayList.md)
     * [HashMap 原理](java/HashMap.md)
     * [HashSet 原理](java/HashSet.md)
     * [HashTable 原理](java/HashTable.md)
+    * [LinkedHashMap 原理](java/LinkedHashMap.md)
+    * [LinkedHashSet 原理](java/LinkedHashSet.md)
+    * [LinkedList 原理](java/LinkedList.md)
 * javascript
     * [javascript 权威指南](javascript/javascript权威指南6.md)
     * [javscript框架设计](javascript/javscript框架设计.md)
