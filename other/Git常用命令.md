@@ -107,14 +107,14 @@ $ git branch --track [branch] [remote-branch]
 # 切换到指定分支，并更新工作区
 $ git checkout [branch-name]
 
-# 切换到上一个分支
+# 切换到上一个分支 
 $ git checkout -
 
 # 建立追踪关系，在现有分支与指定的远程分支之间
 $ git branch --set-upstream [branch] [remote-branch]
 
 # 合并指定分支到当前分支
-$ git merge [branch]
+$ git merge --no-ff [branch]
 
 # 选择一个commit，合并进当前分支
 $ git cherry-pick [commit]
@@ -131,7 +131,7 @@ $ git remote show origin
 $ git remote prune origin
 ```
 
-## 管理远程分支
+## 管理远程分支c
 
 ```
 # 推送到默认远程分支
