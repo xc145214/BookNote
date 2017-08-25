@@ -129,6 +129,9 @@ $ git branch -dr [remote/branch]
 # 删除分支后刷新对应关系
 $ git remote show origin  
 $ git remote prune origin
+
+# no branch 时处理
+$ git reflog show
 ```
 
 ## 管理远程分支c
