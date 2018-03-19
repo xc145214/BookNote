@@ -134,7 +134,7 @@ $ git remote prune origin
 $ git reflog show
 ```
 
-## 管理远程分支c
+## 管理远程分支
 
 ```
 # 推送到默认远程分支
@@ -164,6 +164,12 @@ $ git checkout -b local_branch_name origin/remote_branch_name
 ```
 # git 将文件恢复成服务器版本
 $ git checkout file_path
+
+# git 放弃本次修改文件
+$ git checkout -f 
+
+# git 恢复到某次commit
+$ git reset --hard commitid
 ```
 
 
