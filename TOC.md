@@ -12,6 +12,7 @@
     * [LinkedHashMap 原理](java/LinkedHashMap.md)
     * [LinkedHashSet 原理](java/LinkedHashSet.md)
     * [LinkedList 原理](java/LinkedList.md)
+    * [JVM 垃圾回收及调优](java/JVM垃圾回收及调优.md)
 * javascript
     * [javascript 权威指南](javascript/javascript权威指南6.md)
     * [javscript框架设计](javascript/javscript框架设计.md)
